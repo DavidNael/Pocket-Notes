@@ -100,6 +100,8 @@ class _RegisterViewState extends State<RegisterView> {
                     } else
                       print(e.code);
                   }
+                  Navigator.of(context).pushNamedAndRemoveUntil(
+                      '/VerifyEmail/', (route) => false);
                 },
                 child: const Text('Register',
                     style: TextStyle(

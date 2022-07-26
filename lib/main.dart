@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:pocketnotes/views/HomePage.dart';
 import 'package:pocketnotes/views/LoginView.dart';
 import 'package:pocketnotes/views/RegisterView.dart';
+import 'package:pocketnotes/views/VerifyEmailView.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized;
@@ -13,9 +14,9 @@ void main() {
       ),
       home: const HomePage(),
       routes: {
-        '/Login/':(context) => const LoginView(),
-        '/Register/':(context) => const RegisterView(),
-        
+        '/Login/': (context) => const LoginView(),
+        '/Register/': (context) => const RegisterView(),
+        '/VerifyEmail/': (context) => const VerifyEmailView(),
       },
     ),
   );
