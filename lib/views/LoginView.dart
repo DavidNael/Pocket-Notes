@@ -1,5 +1,8 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:pocketnotes/views/Constants/Routes.dart';
+
+import '../utilities/show_error_dialog.dart';
 
 class LoginView extends StatefulWidget {
   const LoginView({Key? key}) : super(key: key);
@@ -86,19 +89,41 @@ class _LoginViewState extends State<LoginView> {
                   final email = _email.text;
                   final password = _password.text;
                   try {
-                    final userInfo = await FirebaseAuth.instance
-                        .signInWithEmailAndPassword(
-                            email: email, password: password);
-                    print(userInfo);
+                    final userInfo =
+                        await FirebaseAuth.instance.signInWithEmailAndPassword(
+                      email: email,
+                      password: password,
+                    );
+                    Navigator.of(context)
+                        .pushNamedAndRemoveUntil(notesRoute, (route) => false);
                   } on FirebaseAuthException catch (e) {
                     if (e.code == 'invalid-email') {
-                      print('Please Input Valid Email');
+                      await showErrorDialog(context,
+                          'Invalid email: \n\nPlease make sure to use valid email.');
                     } else if (e.code == 'user-not-found') {
-                      print('User Not Found');
+                      await showErrorDialog(context,
+                          'User Not Found: \n\nYour email and password combination doesn\'t exist!');
                     } else if (e.code == 'wrong-password') {
-                      print('Wrong Password');
-                    } else
-                      print(e.code);
+                      await showErrorDialog(context,
+                          'Wrong password: \n\nThe password you have entered is not correct.');
+                    } else {
+                      if (email == '' && password == '') {
+                      } else if (email == '') {
+                        await showErrorDialog(context,
+                            'Empty Email: \n\nPlease fill the email field.');
+                      } else if (password == '') {
+                        await showErrorDialog(context,
+                            'Empty Password: \n\nPlease fill the passsword field.');
+                      } else {
+                        await showErrorDialog(context,
+                            'Unknown Error: \n\nPlease try again later.');
+                      }
+                    }
+                  } catch (e) {
+                    await showErrorDialog(
+                      context,
+                      'Error ${e.toString()}',
+                    );
                   }
                 },
                 child: const Text('Login',
@@ -109,7 +134,7 @@ class _LoginViewState extends State<LoginView> {
             TextButton(
                 onPressed: () {
                   Navigator.of(context)
-                      .pushNamedAndRemoveUntil('/Register/', (route) => false);
+                      .pushNamedAndRemoveUntil(registerRoute, (route) => false);
                 },
                 child: const Text('Don\'t have an Account? Register'))
           ],

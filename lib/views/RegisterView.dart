@@ -1,5 +1,9 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:pocketnotes/views/Constants/Routes.dart';
+
+import '../Container Blocks/Form.dart';
+import '../utilities/show_error_dialog.dart';
 
 class RegisterView extends StatefulWidget {
   const RegisterView({Key? key}) : super(key: key);
@@ -28,14 +32,6 @@ class _RegisterViewState extends State<RegisterView> {
 
   @override
   Widget build(BuildContext context) {
-    final textDecoration = InputDecoration(
-      hintStyle: const TextStyle(fontWeight: FontWeight.bold),
-      filled: true,
-      fillColor: Color.fromARGB(131, 158, 158, 158),
-      border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(30.0),
-          borderSide: BorderSide.none),
-    );
     return Scaffold(
       appBar: AppBar(title: const Text('Register')),
       body: Center(
@@ -86,22 +82,35 @@ class _RegisterViewState extends State<RegisterView> {
                   final email = _email.text;
                   final password = _password.text;
                   try {
-                    final userInfo = await FirebaseAuth.instance
-                        .createUserWithEmailAndPassword(
-                            email: email, password: password);
-                    print(userInfo);
+                    await FirebaseAuth.instance.createUserWithEmailAndPassword(
+                      email: email,
+                      password: password,
+                    );
+                    FirebaseAuth.instance.currentUser?.sendEmailVerification();
+                    Navigator.of(context).pushNamed(verifyEmailRoute);
                   } on FirebaseAuthException catch (e) {
                     if (e.code == 'invalid-email') {
-                      print('Invalid Email');
+                      await showErrorDialog(context,
+                          'Invalid email: \n\nPlease make sure to use valid email.');
                     } else if (e.code == 'weak-password') {
-                      print('Weak Password');
+                      await showErrorDialog(context,
+                          'Short Password: \n\nPlease make sure to use at least 8 characters.');
                     } else if (e.code == 'email-already-in-use') {
-                      print('Email is Already in use');
-                    } else
-                      print(e.code);
+                    } else {
+                      if (email == '' && password == '') {
+                      } else if (email == '') {
+                        await showErrorDialog(context,
+                            'Empty Email: \n\nPlease fill the email field.');
+                      } else if (password == '') {
+                        await showErrorDialog(context,
+                            'Empty Password: \n\nPlease fill the passsword field.');
+                      } else {
+                        await showErrorDialog(context, 'Error ${e.code}');
+                      }
+                    }
+                  } catch (e) {
+                    await showErrorDialog(context, 'Error ${e.toString()}');
                   }
-                  Navigator.of(context).pushNamedAndRemoveUntil(
-                      '/VerifyEmail/', (route) => false);
                 },
                 child: const Text('Register',
                     style: TextStyle(
@@ -111,7 +120,7 @@ class _RegisterViewState extends State<RegisterView> {
             TextButton(
                 onPressed: () {
                   Navigator.of(context)
-                      .pushNamedAndRemoveUntil('/Login/', (route) => false);
+                      .pushNamedAndRemoveUntil(loginRoute, (route) => false);
                 },
                 child: const Text('Already have an Account? Login'))
           ],

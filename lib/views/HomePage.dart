@@ -2,6 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart' show FirebaseAuth;
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:pocketnotes/views/LoginView.dart';
+import 'package:pocketnotes/views/NotesView.dart';
 import 'package:pocketnotes/views/VerifyEmailView.dart';
 import '../firebase_options.dart';
 
@@ -23,22 +24,20 @@ class _HomePageState extends State<HomePage> {
         switch (snapshot.connectionState) {
           case ConnectionState.done:
             final user = FirebaseAuth.instance.currentUser;
-            print(user);
             user?.refreshToken;
             if (user != null) {
               if (user.emailVerified) {
-                print('Email is Verified');
-                return const Text('Done');
+                return const NotesView();
               } else {
                 return const VerifyEmailView();
               }
             } else {
               return const LoginView();
             }
-
-            return const LoginView();
           default:
-            return const CircularProgressIndicator();
+            return const CircularProgressIndicator(
+              value: 3,
+            );
         }
       },
     );
