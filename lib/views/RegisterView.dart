@@ -96,6 +96,8 @@ class _RegisterViewState extends State<RegisterView> {
                       await showErrorDialog(context,
                           'Short Password: \n\nPlease make sure to use at least 8 characters.');
                     } else if (e.code == 'email-already-in-use') {
+                      await showErrorDialog(context,
+                          'Email Exists: \n\nThe email you\'ve entered already exists try to login instead.');
                     } else {
                       if (email == '' && password == '') {
                       } else if (email == '') {
