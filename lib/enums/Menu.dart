@@ -1,0 +1,1 @@
+enum MenuBar { logout }

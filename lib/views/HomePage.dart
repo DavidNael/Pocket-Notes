@@ -1,8 +1,7 @@
-import 'package:firebase_auth/firebase_auth.dart' show FirebaseAuth;
-import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:pocketnotes/Services/auth/auth-service.dart';
 import 'package:pocketnotes/views/LoginView.dart';
-import 'package:pocketnotes/views/NotesView.dart';
+import 'package:pocketnotes/views/Notes/notes_view.dart';
 import 'package:pocketnotes/views/VerifyEmailView.dart';
 import '../firebase_options.dart';
 
@@ -17,16 +16,13 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return FutureBuilder(
-      future: Firebase.initializeApp(
-        options: DefaultFirebaseOptions.currentPlatform,
-      ),
+      future: AuthService.firebase().initialize(),
       builder: (context, snapshot) {
         switch (snapshot.connectionState) {
           case ConnectionState.done:
-            final user = FirebaseAuth.instance.currentUser;
-            user?.refreshToken;
+            final user = AuthService.firebase().currentUser;
             if (user != null) {
-              if (user.emailVerified) {
+              if (user.isVerified) {
                 return const NotesView();
               } else {
                 return const VerifyEmailView();
@@ -36,7 +32,7 @@ class _HomePageState extends State<HomePage> {
             }
           default:
             return const CircularProgressIndicator(
-              value: 3,
+              value: 2,
             );
         }
       },

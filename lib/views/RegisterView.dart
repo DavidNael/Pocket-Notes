@@ -1,9 +1,10 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:pocketnotes/Services/auth/Exceptions.dart';
+import 'package:pocketnotes/Services/auth/auth-service.dart';
 import 'package:pocketnotes/views/Constants/Routes.dart';
 
 import '../Container Blocks/Form.dart';
-import '../utilities/show_error_dialog.dart';
+import '../utilities/dialogs/error_dialog.dart';
 
 class RegisterView extends StatefulWidget {
   const RegisterView({Key? key}) : super(key: key);
@@ -82,36 +83,25 @@ class _RegisterViewState extends State<RegisterView> {
                   final email = _email.text;
                   final password = _password.text;
                   try {
-                    await FirebaseAuth.instance.createUserWithEmailAndPassword(
-                      email: email,
-                      password: password,
-                    );
-                    FirebaseAuth.instance.currentUser?.sendEmailVerification();
+                    await AuthService.firebase()
+                        .createUser(email: email, password: password);
+                    AuthService.firebase().sendEmailVerification();
                     Navigator.of(context).pushNamed(verifyEmailRoute);
-                  } on FirebaseAuthException catch (e) {
-                    if (e.code == 'invalid-email') {
-                      await showErrorDialog(context,
-                          'Invalid email: \n\nPlease make sure to use valid email.');
-                    } else if (e.code == 'weak-password') {
-                      await showErrorDialog(context,
-                          'Short Password: \n\nPlease make sure to use at least 8 characters.');
-                    } else if (e.code == 'email-already-in-use') {
-                      await showErrorDialog(context,
-                          'Email Exists: \n\nThe email you\'ve entered already exists try to login instead.');
-                    } else {
-                      if (email == '' && password == '') {
-                      } else if (email == '') {
-                        await showErrorDialog(context,
-                            'Empty Email: \n\nPlease fill the email field.');
-                      } else if (password == '') {
-                        await showErrorDialog(context,
-                            'Empty Password: \n\nPlease fill the passsword field.');
-                      } else {
-                        await showErrorDialog(context, 'Error ${e.code}');
-                      }
-                    }
-                  } catch (e) {
-                    await showErrorDialog(context, 'Error ${e.toString()}');
+                  } on WeakPasswordAuthException {
+                    await showErrorDialog(context,
+                        'Weak password, make sure to use at least 8 characters.');
+                  } on EmailExistsAuthException {
+                    await showErrorDialog(context, 'Email already exists');
+                  } on EmptyEmailAuthException {
+                    await showErrorDialog(context, 'Email can\'t be empty');
+                  } on EmptyPasswordAuthException {
+                    await showErrorDialog(context, 'Password can\'t be empty');
+                  } on EmptyEmailPasswordAuthException {
+                  } on InvalidEmailAuthException {
+                    await showErrorDialog(context, 'Please enter Valid email');
+                  } on UnknownAuthException {
+                    await showErrorDialog(context,
+                        'Unknown error, Make sure you are connected to the internet and try again.');
                   }
                 },
                 child: const Text('Register',

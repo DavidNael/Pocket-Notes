@@ -2,9 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:pocketnotes/views/Constants/Routes.dart';
 import 'package:pocketnotes/views/HomePage.dart';
 import 'package:pocketnotes/views/LoginView.dart';
-import 'package:pocketnotes/views/NotesView.dart';
+import 'package:pocketnotes/views/Notes/notes_view.dart';
 import 'package:pocketnotes/views/RegisterView.dart';
 import 'package:pocketnotes/views/VerifyEmailView.dart';
+import 'package:pocketnotes/views/Notes/create_update_note_view.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized;
@@ -20,6 +21,7 @@ void main() {
         registerRoute: (context) => const RegisterView(),
         verifyEmailRoute: (context) => const VerifyEmailView(),
         notesRoute: (context) => const NotesView(),
+        createOrUpdateNoteRoute: (context) => const CreateUpdateNoteView(),
       },
     ),
   );

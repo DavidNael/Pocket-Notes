@@ -1,8 +1,9 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:pocketnotes/Services/auth/Exceptions.dart';
+import 'package:pocketnotes/Services/auth/auth-service.dart';
 import 'package:pocketnotes/views/Constants/Routes.dart';
 
-import '../utilities/show_error_dialog.dart';
+import '../utilities/dialogs/error_dialog.dart';
 
 class LoginView extends StatefulWidget {
   const LoginView({Key? key}) : super(key: key);
@@ -89,47 +90,32 @@ class _LoginViewState extends State<LoginView> {
                   final email = _email.text;
                   final password = _password.text;
                   try {
-                    final userInfo =
-                        await FirebaseAuth.instance.signInWithEmailAndPassword(
+                    await AuthService.firebase().login(
                       email: email,
                       password: password,
                     );
-                    if (FirebaseAuth.instance.currentUser?.emailVerified ??
-                        false) {
+                    final user = AuthService.firebase().currentUser;
+                    if (user?.isVerified ?? false) {
                       Navigator.of(context).pushNamedAndRemoveUntil(
                           notesRoute, (route) => false);
                     } else {
                       Navigator.of(context).pushNamedAndRemoveUntil(
                           verifyEmailRoute, (route) => false);
                     }
-                  } on FirebaseAuthException catch (e) {
-                    if (e.code == 'invalid-email') {
-                      await showErrorDialog(context,
-                          'Invalid email: \n\nPlease make sure to use valid email.');
-                    } else if (e.code == 'user-not-found') {
-                      await showErrorDialog(context,
-                          'User Not Found: \n\nYour email and password combination doesn\'t exist!');
-                    } else if (e.code == 'wrong-password') {
-                      await showErrorDialog(context,
-                          'Wrong password: \n\nThe password you have entered is not correct.');
-                    } else {
-                      if (email == '' && password == '') {
-                      } else if (email == '') {
-                        await showErrorDialog(context,
-                            'Empty Email: \n\nPlease fill the email field.');
-                      } else if (password == '') {
-                        await showErrorDialog(context,
-                            'Empty Password: \n\nPlease fill the passsword field.');
-                      } else {
-                        await showErrorDialog(context,
-                            'Unknown Error: \n\nPlease try again later.');
-                      }
-                    }
-                  } catch (e) {
-                    await showErrorDialog(
-                      context,
-                      'Error ${e.toString()}',
-                    );
+                  } on UserNotFoundAuthException {
+                    await showErrorDialog(context, 'User Not Found');
+                  } on WrongPasswordAuthException {
+                    await showErrorDialog(context, 'Wrong Password');
+                  } on EmptyEmailAuthException {
+                    await showErrorDialog(context, 'Email can\'t be empty');
+                  } on EmptyPasswordAuthException {
+                    await showErrorDialog(context, 'Password can\'t be empty');
+                  } on EmptyEmailPasswordAuthException {
+                  } on InvalidEmailAuthException {
+                    await showErrorDialog(context, 'Please enter Valid email');
+                  } on UnknownAuthException {
+                    await showErrorDialog(context,
+                        'Unknown error, Make sure you are connected to the internet and try again.');
                   }
                 },
                 child: const Text('Login',

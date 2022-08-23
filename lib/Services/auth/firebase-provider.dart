@@ -1,7 +1,10 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:pocketnotes/Services/auth/Provider.dart';
 import 'package:pocketnotes/Services/auth/User.dart';
 import 'package:pocketnotes/Services/auth/Exceptions.dart';
+
+import '../../firebase_options.dart';
 
 class FireBaseProvider implements AuthProvider {
   @override
@@ -102,7 +105,7 @@ class FireBaseProvider implements AuthProvider {
   }
 
   @override
-  Future<AuthUser> sendEmailVerification() async {
+  Future<void> sendEmailVerification() async {
     final user = FirebaseAuth.instance.currentUser;
     if (user != null) {
       user.sendEmailVerification();
@@ -110,5 +113,12 @@ class FireBaseProvider implements AuthProvider {
       throw UserNotLoggedInAuthException();
     }
     throw UnimplementedError();
+  }
+
+  @override
+  Future<void> initialize() async {
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    );
   }
 }
