@@ -1,6 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:pocketnotes/Services/auth/Exceptions.dart';
 import 'package:pocketnotes/Services/auth/auth-service.dart';
+import 'package:pocketnotes/Services/auth/bloc/auth_bloc.dart';
+import 'package:pocketnotes/Services/auth/bloc/auth_event.dart';
+import 'package:pocketnotes/Services/auth/bloc/auth_state.dart';
 import 'package:pocketnotes/views/Constants/Routes.dart';
 
 import '../utilities/dialogs/error_dialog.dart';
@@ -32,104 +37,173 @@ class _LoginViewState extends State<LoginView> {
 
   @override
   Widget build(BuildContext context) {
-    final textDecoration = InputDecoration(
-      hintStyle: const TextStyle(fontWeight: FontWeight.bold),
-      filled: true,
-      fillColor: const Color.fromARGB(131, 158, 158, 158),
-      border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(30.0),
-          borderSide: BorderSide.none),
-    );
     return Scaffold(
-      appBar: AppBar(title: const Text('Login')),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Container(
-              margin: const EdgeInsets.all(30),
-              padding: const EdgeInsets.all(1),
-              width: 400,
-              height: 60,
-              child: TextField(
-                  style: const TextStyle(color: Colors.black),
-                  controller: _email,
-                  enableSuggestions: false,
-                  autocorrect: false,
-                  keyboardType: TextInputType.emailAddress,
-                  textAlign: TextAlign.center,
-                  decoration:
-                      textDecoration.copyWith(hintText: 'Enter Your Email')),
-            ),
-            Container(
-              margin: const EdgeInsets.all(30),
-              padding: const EdgeInsets.all(1),
-              width: 400,
-              height: 60,
-              child: TextField(
-                  controller: _password,
-                  obscureText: true,
-                  enableSuggestions: false,
-                  autocorrect: false,
-                  textAlign: TextAlign.center,
-                  decoration:
-                      textDecoration.copyWith(hintText: 'Enter Your Password')),
-            ),
-            Container(
-              // padding: const EdgeInsets.all(21),
-              margin: const EdgeInsets.all(31),
-              width: 200,
-              height: 60,
-              decoration: ShapeDecoration(
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(40.0),
-                      side: BorderSide(color: Colors.black)),
-                  color: const Color.fromRGBO(52, 229, 235, 100)),
-              child: TextButton(
-                onPressed: () async {
-                  final email = _email.text;
-                  final password = _password.text;
-                  try {
-                    await AuthService.firebase().login(
-                      email: email,
-                      password: password,
-                    );
-                    final user = AuthService.firebase().currentUser;
-                    if (user?.isVerified ?? false) {
-                      Navigator.of(context).pushNamedAndRemoveUntil(
-                          notesRoute, (route) => false);
-                    } else {
-                      Navigator.of(context).pushNamedAndRemoveUntil(
-                          verifyEmailRoute, (route) => false);
-                    }
-                  } on UserNotFoundAuthException {
-                    await showErrorDialog(context, 'User Not Found');
-                  } on WrongPasswordAuthException {
-                    await showErrorDialog(context, 'Wrong Password');
-                  } on EmptyEmailAuthException {
-                    await showErrorDialog(context, 'Email can\'t be empty');
-                  } on EmptyPasswordAuthException {
-                    await showErrorDialog(context, 'Password can\'t be empty');
-                  } on EmptyEmailPasswordAuthException {
-                  } on InvalidEmailAuthException {
-                    await showErrorDialog(context, 'Please enter Valid email');
-                  } on UnknownAuthException {
-                    await showErrorDialog(context,
-                        'Unknown error, Make sure you are connected to the internet and try again.');
-                  }
-                },
-                child: const Text('Login',
-                    style: TextStyle(
-                        color: Colors.black, fontWeight: FontWeight.bold)),
+      appBar: AppBar(
+        title: const Center(
+          child: Text(
+            'Login',
+            style: TextStyle(color: Colors.black),
+          ),
+        ),
+      ),
+      backgroundColor: Colors.grey[300],
+      body: SafeArea(
+        child: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              ///E-mail Field
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 25.0),
+                child: Container(
+                  decoration: BoxDecoration(
+                      color: Colors.grey[200],
+                      // border: Border.all(color: Colors.white),
+                      borderRadius: BorderRadius.circular(12.0)),
+                  child: TextField(
+                    keyboardType: TextInputType.emailAddress,
+                    style: const TextStyle(color: Colors.black),
+                    controller: _email,
+                    enableSuggestions: false,
+                    autocorrect: false,
+                    textAlign: TextAlign.center,
+                    decoration: InputDecoration(
+                        enabledBorder: OutlineInputBorder(
+                          borderSide:
+                              const BorderSide(color: Colors.white, width: 1.0),
+                          borderRadius: BorderRadius.circular(12.0),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderSide: const BorderSide(
+                            color: Colors.amber,
+                            width: 1.0,
+                          ),
+                          borderRadius: BorderRadius.circular(12.0),
+                        ),
+                        border: InputBorder.none,
+                        hintText: 'Enter your Email...'),
+                  ),
+                ),
               ),
-            ),
-            TextButton(
-                onPressed: () {
-                  Navigator.of(context)
-                      .pushNamedAndRemoveUntil(registerRoute, (route) => false);
-                },
-                child: const Text('Don\'t have an Account? Register'))
-          ],
+              const SizedBox(
+                height: 10.0,
+              ),
+
+              ///Password Field
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 25.0),
+                child: Container(
+                  decoration: BoxDecoration(
+                      color: Colors.grey[200],
+                      // border: Border.all(color: Colors.white),
+                      borderRadius: BorderRadius.circular(12.0)),
+                  child: TextField(
+                    obscureText: true,
+                    style: const TextStyle(color: Colors.black),
+                    controller: _password,
+                    enableSuggestions: false,
+                    autocorrect: false,
+                    textAlign: TextAlign.center,
+                    decoration: InputDecoration(
+                        enabledBorder: OutlineInputBorder(
+                          borderSide:
+                              const BorderSide(color: Colors.white, width: 1.0),
+                          borderRadius: BorderRadius.circular(12.0),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderSide: const BorderSide(
+                            color: Colors.amber,
+                            width: 1.0,
+                          ),
+                          borderRadius: BorderRadius.circular(12.0),
+                        ),
+                        border: InputBorder.none,
+                        hintText: 'Enter your Password...'),
+                  ),
+                ),
+              ),
+
+              ///Login Button
+              Container(
+                padding: const EdgeInsets.all(20),
+                child: SizedBox(
+                  width: 250,
+                  height: 60,
+                  child: BlocListener<AuthBloc, AuthState>(
+                    listener: (context, state) async {
+                      if (state is AuthStateLoggedOut) {
+                        if (state.exception is UserNotFoundAuthException) {
+                          await showErrorDialog(context, 'User not found.');
+                        } else if (state.exception
+                            is WrongPasswordAuthException) {
+                          await showErrorDialog(context, 'Wrong Credentials.');
+                        } else if (state.exception
+                            is UserNotLoggedInAuthException) {
+                          await showErrorDialog(context, 'User not logged in.');
+                        } else if (state.exception is EmptyEmailAuthException) {
+                          await showErrorDialog(
+                              context, 'Email field can\'t be empty.');
+                        } else if (state.exception
+                            is EmptyPasswordAuthException) {
+                          await showErrorDialog(
+                              context, 'Password field can\'t be empty.');
+                        } else if (state.exception
+                            is InvalidEmailAuthException) {
+                          await showErrorDialog(
+                              context, 'Invalid email format.');
+                        } else if (state.exception is UnknownAuthException) {
+                          await showErrorDialog(context,
+                              'Unknown error, Make sure you are connected to the internet and try again.');
+                        }
+                      }
+                    },
+                    child: TextButton(
+                      style: ButtonStyle(
+                        shape: MaterialStateProperty.all(RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12.0))),
+                        backgroundColor:
+                            MaterialStateProperty.all<Color>(Colors.amber),
+                      ),
+                      onPressed: () async {
+                        final email = _email.text;
+                        final password = _password.text;
+                        context.read<AuthBloc>().add(AuthEventLogIn(
+                              email,
+                              password,
+                            ));
+                      },
+                      child: const Text(
+                        'Login',
+                        style: TextStyle(
+                          color: Colors.black,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+
+              ///Register Button
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Text(
+                    'Don\'t have an Account?',
+                  ),
+                  TextButton(
+                      onPressed: () {
+                        Navigator.of(context).pushNamedAndRemoveUntil(
+                            registerRoute, (route) => false);
+                      },
+                      child: const Text(
+                        'Register',
+                        style: TextStyle(color: Colors.blue),
+                      )),
+                ],
+              )
+            ],
+          ),
         ),
       ),
     );

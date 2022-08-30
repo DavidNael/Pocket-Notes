@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:pocketnotes/Services/auth/bloc/auth_bloc.dart';
+import 'package:pocketnotes/Services/auth/firebase-provider.dart';
 import 'package:pocketnotes/views/Constants/Routes.dart';
 import 'package:pocketnotes/views/HomePage.dart';
 import 'package:pocketnotes/views/LoginView.dart';
@@ -13,9 +16,12 @@ void main() {
     MaterialApp(
       title: 'Flutter Demo',
       theme: ThemeData(
-        primarySwatch: Colors.blue,
+        primarySwatch: Colors.amber,
       ),
-      home: const HomePage(),
+      home: BlocProvider<AuthBloc>(
+        create: (context) => AuthBloc(FireBaseProvider()),
+        child: const HomePage(),
+      ),
       routes: {
         loginRoute: (context) => const LoginView(),
         registerRoute: (context) => const RegisterView(),

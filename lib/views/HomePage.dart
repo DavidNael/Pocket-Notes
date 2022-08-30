@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:pocketnotes/Services/auth/auth-service.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:pocketnotes/Services/auth/bloc/auth_bloc.dart';
+import 'package:pocketnotes/Services/auth/bloc/auth_event.dart';
+import 'package:pocketnotes/Services/auth/bloc/auth_state.dart';
 import 'package:pocketnotes/views/LoginView.dart';
 import 'package:pocketnotes/views/Notes/notes_view.dart';
 import 'package:pocketnotes/views/VerifyEmailView.dart';
-import '../firebase_options.dart';
+
+import 'Constants/Widgets.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
@@ -15,25 +19,21 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder(
-      future: AuthService.firebase().initialize(),
-      builder: (context, snapshot) {
-        switch (snapshot.connectionState) {
-          case ConnectionState.done:
-            final user = AuthService.firebase().currentUser;
-            if (user != null) {
-              if (user.isVerified) {
-                return const NotesView();
-              } else {
-                return const VerifyEmailView();
-              }
-            } else {
-              return const LoginView();
-            }
-          default:
-            return const CircularProgressIndicator(
-              value: 2,
-            );
+    context.read<AuthBloc>().add(const AuthEventInitialize());
+    return BlocBuilder<AuthBloc, AuthState>(
+      builder: (context, state) {
+        if (state is AuthStateLoggedIn) {
+          return const NotesView();
+        } else if (state is AuthStateNeedsVerefication) {
+          return const VerifyEmailView();
+        } else if (state is AuthStateLoggedOut) {
+          return const LoginView();
+        } else if (state is AuthStateLoading) {
+          return loadingWidget;
+        } else {
+          return const Scaffold(
+            body: Text('Error Loading App....'),
+          );
         }
       },
     );

@@ -1,8 +1,12 @@
-import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart';
+// ignore_for_file: use_build_context_synchronously
 
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:pocketnotes/Services/auth/bloc/auth_bloc.dart';
+import 'package:pocketnotes/Services/auth/bloc/auth_event.dart';
+import 'package:pocketnotes/Services/cloud/cloud_note.dart';
+import 'package:pocketnotes/Services/cloud/firebase_cloud_storage.dart';
 import '../../Services/auth/auth-service.dart';
-import '../../Services/crud/notes_service.dart';
 import '../../enums/Menu.dart';
 import '../../utilities/dialogs/logout_dialog.dart';
 import '../Constants/Routes.dart';
@@ -16,12 +20,12 @@ class NotesView extends StatefulWidget {
 }
 
 class _NotesViewState extends State<NotesView> {
-  late final NotesService _notesService;
-  String get userEmail => AuthService.firebase().currentUser!.email;
+  late final FirebaseCloudStorage _notesService;
+  String get userId => AuthService.firebase().currentUser!.id;
 
   @override
   void initState() {
-    _notesService = NotesService();
+    _notesService = FirebaseCloudStorage();
     super.initState();
   }
 
@@ -43,11 +47,7 @@ class _NotesViewState extends State<NotesView> {
                   case MenuBar.logout:
                     final confirmLogout = await logoutConfirmation(context);
                     if (confirmLogout) {
-                      AuthService.firebase().logout();
-                      Navigator.of(context).pushNamedAndRemoveUntil(
-                        loginRoute,
-                        (_) => false,
-                      );
+                      context.read<AuthBloc>().add(const AuthEventLogOut());
                     }
                     break;
                 }
@@ -63,38 +63,28 @@ class _NotesViewState extends State<NotesView> {
             )
           ],
         ),
-        body: FutureBuilder(
-          future: _notesService.getOrCreateUser(email: userEmail),
+        body: StreamBuilder(
+          stream: _notesService.allNotes(ownerUserId: userId),
           builder: (context, snapshot) {
             switch (snapshot.connectionState) {
-              case ConnectionState.done:
-                return StreamBuilder(
-                  stream: _notesService.allNotes,
-                  builder: (context, snapshot) {
-                    switch (snapshot.connectionState) {
-                      case ConnectionState.waiting:
-                      case ConnectionState.active:
-                        if (snapshot.hasData) {
-                          final allNotes = snapshot.data as List<DatabaseNote>;
-                          return NotesListView(
-                            notes: allNotes,
-                            onDeleteNote: (note) async {
-                              await _notesService.deleteNote(id: note.id);
-                            },
-                            onTap: (note) {
-                              Navigator.of(context).pushNamed(
-                                  createOrUpdateNoteRoute,
-                                  arguments: note);
-                            },
-                          );
-                        } else {
-                          return const Text('No notes available...');
-                        }
-                      default:
-                        return const CircularProgressIndicator();
-                    }
-                  },
-                );
+              case ConnectionState.waiting:
+              case ConnectionState.active:
+                if (snapshot.hasData) {
+                  final allNotes = snapshot.data as Iterable<CloudNote>;
+                  return NotesListView(
+                    notes: allNotes,
+                    onDeleteNote: (note) async {
+                      await _notesService.deleteNotes(
+                          documentId: note.documentId);
+                    },
+                    onTap: (note) {
+                      Navigator.of(context)
+                          .pushNamed(createOrUpdateNoteRoute, arguments: note);
+                    },
+                  );
+                } else {
+                  return const Text('No notes available...');
+                }
               default:
                 return const CircularProgressIndicator();
             }
