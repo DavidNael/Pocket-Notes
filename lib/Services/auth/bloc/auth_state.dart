@@ -1,30 +1,58 @@
+import 'package:equatable/equatable.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:pocketnotes/Services/auth/User.dart';
 
 @immutable
 abstract class AuthState {
-  const AuthState();
+  final bool isLoading;
+  final String? loadingText;
+  const AuthState({
+    required this.isLoading,
+    this.loadingText = 'loading...',
+  });
 }
 
-class AuthStateLoading extends AuthState {
-  const AuthStateLoading();
+class AuthStateRegistering extends AuthState {
+  final Exception? exception;
+  const AuthStateRegistering(
+      {required this.exception, required bool isLoading, String? loadingText})
+      : super(isLoading: isLoading, loadingText: loadingText);
+}
+
+class AuthStateForgotPassword extends AuthState {
+  final Exception? exception;
+  final bool hasSentEmail;
+
+  const AuthStateForgotPassword(
+      {required this.exception,
+      required this.hasSentEmail,
+      required bool isLoading})
+      : super(isLoading: isLoading);
+}
+
+class AuthStateUninitialized extends AuthState {
+  const AuthStateUninitialized() : super(isLoading: false);
 }
 
 class AuthStateLoggedIn extends AuthState {
   final AuthUser user;
-  const AuthStateLoggedIn(this.user);
+  const AuthStateLoggedIn(this.user, {required bool isLoading})
+      : super(isLoading: isLoading);
 }
 
-class AuthStateNeedsVerefication extends AuthState {
-  const AuthStateNeedsVerefication();
-}
-
-class AuthStateLoggedOut extends AuthState {
+class AuthStateNeedsVerification extends AuthState {
   final Exception? exception;
-  const AuthStateLoggedOut(this.exception);
+  const AuthStateNeedsVerification(
+      {required bool isLoading, required this.exception, String? loadingText})
+      : super(isLoading: isLoading, loadingText: loadingText);
 }
 
-class AuthStateLogoutFailure extends AuthState {
-  final Exception exception;
-  const AuthStateLogoutFailure(this.exception);
+class AuthStateLoggedOut extends AuthState with EquatableMixin {
+  final Exception? exception;
+  const AuthStateLoggedOut(
+      {required this.exception, required bool isLoading, String? loadingtext})
+      : super(isLoading: isLoading, loadingText: loadingtext);
+
+  @override
+  List<Object?> get props => [exception, isLoading];
 }

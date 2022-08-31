@@ -2,11 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:pocketnotes/Services/auth/Exceptions.dart';
 import 'package:pocketnotes/Services/auth/auth-service.dart';
+import 'package:pocketnotes/utilities/dialogs/loading_dialog.dart';
+import 'package:pocketnotes/utilities/dialogs/verification_dialog.dart';
 import 'package:pocketnotes/views/Constants/Routes.dart';
 
 import '../Container Blocks/Form.dart';
 import '../Services/auth/bloc/auth_bloc.dart';
 import '../Services/auth/bloc/auth_event.dart';
+import '../Services/auth/bloc/auth_state.dart';
 import '../utilities/dialogs/error_dialog.dart';
 
 class RegisterView extends StatefulWidget {
@@ -36,158 +39,168 @@ class _RegisterViewState extends State<RegisterView> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Center(
-          child: Text(
-            'Register',
-            style: TextStyle(color: Colors.black),
+    return BlocListener<AuthBloc, AuthState>(
+      listener: (context, state) async {
+        if (state is AuthStateRegistering) {
+          if (state.exception is WeakPasswordAuthException) {
+            await showErrorDialog(context, 'Weak Password');
+          } else if (state.exception is EmailExistsAuthException) {
+            await showErrorDialog(
+                context, 'The email you are trying to enter already exists.');
+          } else if (state.exception is VerifyEmailException) {
+            final verifyDialog = await showVerificationDialog(context);
+            if (verifyDialog) {
+              context.read<AuthBloc>().add(const AuthEventLogOut());
+            }
+          } else if (state.exception is UserNotLoggedInAuthException) {
+            await showErrorDialog(context, 'User not logged in.');
+          } else if (state.exception is EmptyEmailAuthException) {
+            await showErrorDialog(context, 'Email field can\'t be empty.');
+          } else if (state.exception is EmptyPasswordAuthException) {
+            await showErrorDialog(context, 'Password field can\'t be empty.');
+          } else if (state.exception is InvalidEmailAuthException) {
+            await showErrorDialog(context, 'Invalid email format.');
+          } else if (state.exception is UnknownException) {
+            await showErrorDialog(context,
+                'Unknown error, Make sure you are connected to the internet and try again.');
+          }
+        }
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Center(
+            child: Text(
+              'Register',
+              style: TextStyle(color: Colors.black),
+            ),
           ),
         ),
-      ),
-      backgroundColor: Colors.grey[300],
-      body: SafeArea(
-        child: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              ///E-mail Field
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 25.0),
-                child: Container(
-                  decoration: BoxDecoration(
-                      color: Colors.grey[200],
-                      // border: Border.all(color: Colors.white),
-                      borderRadius: BorderRadius.circular(12.0)),
-                  child: TextField(
-                    keyboardType: TextInputType.emailAddress,
-                    style: const TextStyle(color: Colors.black),
-                    controller: _email,
-                    enableSuggestions: false,
-                    autocorrect: false,
-                    textAlign: TextAlign.center,
-                    decoration: InputDecoration(
-                        enabledBorder: OutlineInputBorder(
-                          borderSide:
-                              const BorderSide(color: Colors.white, width: 1.0),
-                          borderRadius: BorderRadius.circular(12.0),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderSide: const BorderSide(
-                            color: Colors.amber,
-                            width: 1.0,
+        backgroundColor: Colors.grey[300],
+        body: SafeArea(
+          child: Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                ///E-mail Field
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 25.0),
+                  child: Container(
+                    decoration: BoxDecoration(
+                        color: Colors.grey[200],
+                        // border: Border.all(color: Colors.white),
+                        borderRadius: BorderRadius.circular(12.0)),
+                    child: TextField(
+                      keyboardType: TextInputType.emailAddress,
+                      style: const TextStyle(color: Colors.black),
+                      controller: _email,
+                      enableSuggestions: false,
+                      autocorrect: false,
+                      textAlign: TextAlign.center,
+                      decoration: InputDecoration(
+                          enabledBorder: OutlineInputBorder(
+                            borderSide: const BorderSide(
+                                color: Colors.white, width: 1.0),
+                            borderRadius: BorderRadius.circular(12.0),
                           ),
-                          borderRadius: BorderRadius.circular(12.0),
-                        ),
-                        border: InputBorder.none,
-                        hintText: 'Enter your Email...'),
-                  ),
-                ),
-              ),
-              const SizedBox(
-                height: 10.0,
-              ),
-
-              ///Password Field
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 25.0),
-                child: Container(
-                  decoration: BoxDecoration(
-                      color: Colors.grey[200],
-                      // border: Border.all(color: Colors.white),
-                      borderRadius: BorderRadius.circular(12.0)),
-                  child: TextField(
-                    obscureText: true,
-                    style: const TextStyle(color: Colors.black),
-                    controller: _password,
-                    enableSuggestions: false,
-                    autocorrect: false,
-                    textAlign: TextAlign.center,
-                    decoration: InputDecoration(
-                        enabledBorder: OutlineInputBorder(
-                          borderSide:
-                              const BorderSide(color: Colors.white, width: 1.0),
-                          borderRadius: BorderRadius.circular(12.0),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderSide: const BorderSide(
-                            color: Colors.amber,
-                            width: 1.0,
+                          focusedBorder: OutlineInputBorder(
+                            borderSide: const BorderSide(
+                              color: Colors.amber,
+                              width: 1.0,
+                            ),
+                            borderRadius: BorderRadius.circular(12.0),
                           ),
-                          borderRadius: BorderRadius.circular(12.0),
-                        ),
-                        border: InputBorder.none,
-                        hintText: 'Enter your Password...'),
-                  ),
-                ),
-              ),
-              Container(
-                padding: const EdgeInsets.all(20),
-                child: SizedBox(
-                  width: 250,
-                  height: 60,
-                  child: TextButton(
-                    style: ButtonStyle(
-                      shape: MaterialStateProperty.all(RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12.0))),
-                      backgroundColor:
-                          MaterialStateProperty.all<Color>(Colors.amber),
+                          border: InputBorder.none,
+                          hintText: 'Enter your Email...'),
                     ),
-                    onPressed: () async {
-                      final email = _email.text;
-                      final password = _password.text;
-                      try {
-                        await AuthService.firebase()
-                            .createUser(email: email, password: password);
-                        AuthService.firebase().sendEmailVerification();
-                        Navigator.of(context).pushNamed(verifyEmailRoute);
-                      } on WeakPasswordAuthException {
-                        await showErrorDialog(context,
-                            'Weak password, make sure to use at least 8 characters.');
-                      } on EmailExistsAuthException {
-                        await showErrorDialog(context, 'Email already exists');
-                      } on EmptyEmailAuthException {
-                        await showErrorDialog(context, 'Email can\'t be empty');
-                      } on EmptyPasswordAuthException {
-                        await showErrorDialog(
-                            context, 'Password can\'t be empty');
-                      } on EmptyEmailPasswordAuthException {
-                      } on InvalidEmailAuthException {
-                        await showErrorDialog(
-                            context, 'Please enter Valid email');
-                      } on UnknownAuthException {
-                        await showErrorDialog(context,
-                            'Unknown error, Make sure you are connected to the internet and try again.');
-                      }
-                    },
-                    child: const Text(
-                      'Register',
-                      style: TextStyle(
-                        color: Colors.black,
-                        fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(
+                  height: 10.0,
+                ),
+
+                ///Password Field
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 25.0),
+                  child: Container(
+                    decoration: BoxDecoration(
+                        color: Colors.grey[200],
+                        // border: Border.all(color: Colors.white),
+                        borderRadius: BorderRadius.circular(12.0)),
+                    child: TextField(
+                      obscureText: true,
+                      style: const TextStyle(color: Colors.black),
+                      controller: _password,
+                      enableSuggestions: false,
+                      autocorrect: false,
+                      textAlign: TextAlign.center,
+                      decoration: InputDecoration(
+                          enabledBorder: OutlineInputBorder(
+                            borderSide: const BorderSide(
+                                color: Colors.white, width: 1.0),
+                            borderRadius: BorderRadius.circular(12.0),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderSide: const BorderSide(
+                              color: Colors.amber,
+                              width: 1.0,
+                            ),
+                            borderRadius: BorderRadius.circular(12.0),
+                          ),
+                          border: InputBorder.none,
+                          hintText: 'Enter your Password...'),
+                    ),
+                  ),
+                ),
+                Container(
+                  padding: const EdgeInsets.all(20),
+                  child: SizedBox(
+                    width: 250,
+                    height: 60,
+                    child: TextButton(
+                      style: ButtonStyle(
+                        shape: MaterialStateProperty.all(RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12.0))),
+                        backgroundColor:
+                            MaterialStateProperty.all<Color>(Colors.amber),
+                      ),
+                      onPressed: () async {
+                        final email = _email.text;
+                        final password = _password.text;
+                        context.read<AuthBloc>().add(
+                              AuthEventRegister(
+                                email,
+                                password,
+                              ),
+                            );
+                      },
+                      child: const Text(
+                        'Register',
+                        style: TextStyle(
+                          color: Colors.black,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ),
                   ),
                 ),
-              ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Text(
-                    'Already have an Account?',
-                  ),
-                  TextButton(
-                      onPressed: () {
-                        Navigator.of(context).pushNamedAndRemoveUntil(
-                            loginRoute, (route) => false);
-                      },
-                      child: const Text(
-                        'Login',
-                        style: TextStyle(color: Colors.blue),
-                      )),
-                ],
-              )
-            ],
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Text(
+                      'Already have an Account?',
+                    ),
+                    TextButton(
+                        onPressed: () {
+                          context.read<AuthBloc>().add(const AuthEventLogOut());
+                        },
+                        child: const Text(
+                          'Login',
+                          style: TextStyle(color: Colors.blue),
+                        )),
+                  ],
+                )
+              ],
+            ),
           ),
         ),
       ),

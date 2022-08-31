@@ -7,12 +7,25 @@ import 'package:pocketnotes/Services/auth/Exceptions.dart';
 import '../../firebase_options.dart';
 
 class FireBaseProvider implements AuthProvider {
+  ///Register
   @override
   Future<AuthUser> createUser({
     required String email,
     required String password,
   }) async {
+    bool validatePassword(String value) {
+      RegExp regExp = RegExp(r'^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9]).{8,}$');
+      if (regExp.hasMatch(value)) {
+        return true;
+      } else {
+        return false;
+      }
+    }
+
     try {
+      if (!validatePassword(password) && password.isNotEmpty) {
+        throw WeakPasswordAuthException();
+      }
       await FirebaseAuth.instance.createUserWithEmailAndPassword(
         email: email,
         password: password,
@@ -38,14 +51,17 @@ class FireBaseProvider implements AuthProvider {
         } else if (password == '') {
           throw EmptyPasswordAuthException();
         } else {
-          throw UnknownAuthException();
+          throw UnknownException();
         }
       }
+    } on WeakPasswordAuthException catch (_) {
+      throw WeakPasswordAuthException();
     } catch (_) {
-      throw UnknownAuthException();
+      throw UnknownException();
     }
   }
 
+  ///User Getter
   @override
   AuthUser? get currentUser {
     final user = FirebaseAuth.instance.currentUser;
@@ -55,6 +71,7 @@ class FireBaseProvider implements AuthProvider {
     return null;
   }
 
+  ///Login
   @override
   Future<AuthUser> login({
     required String email,
@@ -86,14 +103,15 @@ class FireBaseProvider implements AuthProvider {
         } else if (password == '') {
           throw EmptyPasswordAuthException();
         } else {
-          throw UnknownAuthException();
+          throw UnknownException();
         }
       }
     } catch (_) {
-      throw UnknownAuthException();
+      throw UnknownException();
     }
   }
 
+  ///Logout
   @override
   Future<void> logout() async {
     final user = FirebaseAuth.instance.currentUser;
@@ -104,15 +122,22 @@ class FireBaseProvider implements AuthProvider {
     }
   }
 
+  ///Send Email Verification
   @override
   Future<void> sendEmailVerification() async {
     final user = FirebaseAuth.instance.currentUser;
-    if (user != null) {
-      user.sendEmailVerification();
-    } else {
-      throw UserNotLoggedInAuthException();
+    try {
+      if (user != null) {
+        await user.sendEmailVerification();
+        throw VerifyEmailException();
+      } else {
+        throw UserNotLoggedInAuthException();
+      }
+    } on VerifyEmailException catch (e) {
+      throw VerifyEmailException();
+    } on Exception catch (e) {
+      throw UnknownException();
     }
-    throw UnimplementedError();
   }
 
   @override
@@ -120,5 +145,30 @@ class FireBaseProvider implements AuthProvider {
     await Firebase.initializeApp(
       options: DefaultFirebaseOptions.currentPlatform,
     );
+  }
+
+  ///Reset Password
+  @override
+  Future<void> sendPasswordReset({required String toEmail}) async {
+    try {
+      await FirebaseAuth.instance.sendPasswordResetEmail(email: toEmail);
+      throw ResetPasswordException();
+    } on ResetPasswordException catch (e) {
+      throw ResetPasswordException();
+    } on FirebaseAuthException catch (e) {
+      if (e.code == 'invalid-email') {
+        throw InvalidEmailAuthException();
+      } else if (e.code == 'user-not-found') {
+        throw UserNotFoundAuthException();
+      } else {
+        if (toEmail.isEmpty) {
+          throw EmptyEmailAuthException();
+        } else {
+          throw UnknownException();
+        }
+      }
+    } catch (_) {
+      throw UnknownException();
+    }
   }
 }

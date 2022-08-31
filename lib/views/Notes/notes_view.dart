@@ -71,19 +71,34 @@ class _NotesViewState extends State<NotesView> {
               case ConnectionState.active:
                 if (snapshot.hasData) {
                   final allNotes = snapshot.data as Iterable<CloudNote>;
-                  return NotesListView(
-                    notes: allNotes,
-                    onDeleteNote: (note) async {
-                      await _notesService.deleteNotes(
-                          documentId: note.documentId);
-                    },
-                    onTap: (note) {
-                      Navigator.of(context)
-                          .pushNamed(createOrUpdateNoteRoute, arguments: note);
-                    },
-                  );
+                  if (allNotes.isEmpty) {
+                    return Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: const [
+                        Text('No Notes Available...'),
+                      ],
+                    );
+                  } else {
+                    return NotesListView(
+                      notes: allNotes,
+                      onDeleteNote: (note) async {
+                        await _notesService.deleteNotes(
+                            documentId: note.documentId);
+                      },
+                      onTap: (note) {
+                        Navigator.of(context).pushNamed(createOrUpdateNoteRoute,
+                            arguments: note);
+                      },
+                    );
+                  }
                 } else {
-                  return const Text('No notes available...');
+                  return Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: const [
+                      Text('Loading Notes...'),
+                      CircularProgressIndicator()
+                    ],
+                  );
                 }
               default:
                 return const CircularProgressIndicator();

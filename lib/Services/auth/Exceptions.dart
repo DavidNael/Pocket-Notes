@@ -19,4 +19,8 @@ class EmptyEmailPasswordAuthException implements Exception {}
 
 class InvalidEmailAuthException implements Exception {}
 
-class UnknownAuthException implements Exception {}
+class VerifyEmailException implements Exception {}
+
+class ResetPasswordException implements Exception {}
+
+class UnknownException implements Exception {}
