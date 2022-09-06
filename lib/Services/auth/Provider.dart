@@ -1,4 +1,4 @@
-import 'package:pocketnotes/Services/auth/User.dart';
+import 'package:pocketnotes/Services/auth/user.dart';
 
 abstract class AuthProvider {
   Future<void> initialize();

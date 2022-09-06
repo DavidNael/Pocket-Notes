@@ -1,20 +1,15 @@
 import 'package:bloc/bloc.dart';
-import 'package:pocketnotes/Services/auth/Exceptions.dart';
-import 'package:pocketnotes/Services/auth/Provider.dart';
+import 'package:pocketnotes/Services/auth/exceptions.dart';
+import 'package:pocketnotes/Services/auth/provider.dart';
 import 'package:pocketnotes/Services/auth/bloc/auth_event.dart';
 import 'package:pocketnotes/Services/auth/bloc/auth_state.dart';
-import 'package:pocketnotes/utilities/dialogs/verification_dialog.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class AuthBloc extends Bloc<AuthEvent, AuthState> {
   AuthBloc(AuthProvider provider) : super(const AuthStateUninitialized()) {
     ///Forgot Password
     on<AuthEventForgotpassword>(
       ((event, emit) async {
-        emit(const AuthStateForgotPassword(
-          exception: null,
-          hasSentEmail: false,
-          isLoading: true,
-        ));
         final email = event.email;
 
         ///Just visiting the page
@@ -89,17 +84,29 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       emit(const AuthStateRegistering(exception: null, isLoading: false));
     }));
 
+    ///First Launch
+    on<AuthEventWelcome>(((event, emit) {
+      emit(const AuthStateFirstLaunch(isLoading: false));
+    }));
+
     ///Initialize
+
     on<AuthEventInitialize>(((event, emit) async {
       await provider.initialize();
+      final prefs = await SharedPreferences.getInstance();
+      final showWelcome = prefs.getBool('showWelcome') ?? true;
       final user = provider.currentUser;
       if (user == null) {
-        emit(
-          const AuthStateLoggedOut(
-            exception: null,
-            isLoading: false,
-          ),
-        );
+        if (showWelcome) {
+          emit(const AuthStateFirstLaunch(isLoading: false));
+        } else {
+          emit(
+            const AuthStateLoggedOut(
+              exception: null,
+              isLoading: false,
+            ),
+          );
+        }
       } else if (user.isVerified != true) {
         emit(const AuthStateNeedsVerification(
             isLoading: false, exception: null));

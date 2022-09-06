@@ -1,9 +1,6 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/src/foundation/key.dart';
-import 'package:flutter/src/widgets/framework.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:pocketnotes/Services/auth/Exceptions.dart';
+import 'package:pocketnotes/Services/auth/exceptions.dart';
 import 'package:pocketnotes/Services/auth/bloc/auth_bloc.dart';
 import 'package:pocketnotes/Services/auth/bloc/auth_event.dart';
 import 'package:pocketnotes/Services/auth/bloc/auth_state.dart';
@@ -61,88 +58,93 @@ class _ForgotPasswordViewState extends State<ForgotPasswordView> {
           title: const Text('Forgot Password'),
         ),
         backgroundColor: Colors.grey[300],
-        body: SafeArea(
-          child: Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                ///E-mail Field
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 25.0),
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: Colors.grey[200],
-                      borderRadius: BorderRadius.circular(12.0),
-                    ),
-                    child: TextField(
-                      keyboardType: TextInputType.emailAddress,
-                      style: const TextStyle(color: Colors.black),
-                      controller: _controller,
-                      enableSuggestions: false,
-                      autocorrect: false,
-                      textAlign: TextAlign.center,
-                      decoration: InputDecoration(
-                          enabledBorder: OutlineInputBorder(
-                            borderSide: const BorderSide(
-                                color: Colors.white, width: 1.0),
-                            borderRadius: BorderRadius.circular(12.0),
-                          ),
-                          focusedBorder: OutlineInputBorder(
-                            borderSide: const BorderSide(
-                              color: Colors.amber,
-                              width: 1.0,
-                            ),
-                            borderRadius: BorderRadius.circular(12.0),
-                          ),
-                          border: InputBorder.none,
-                          hintText: 'Enter your Email...'),
-                    ),
-                  ),
-                ),
-                const SizedBox(
-                  height: 10.0,
-                ),
-
-                /// Reset Button
-                Container(
-                  padding: const EdgeInsets.all(20),
-                  child: SizedBox(
-                    width: 250,
-                    height: 60,
-                    child: TextButton(
-                      style: ButtonStyle(
-                        shape: MaterialStateProperty.all(RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12.0))),
-                        backgroundColor:
-                            MaterialStateProperty.all<Color>(Colors.amber),
-                      ),
-                      onPressed: () async {
-                        final email = _controller.text;
-                        context.read<AuthBloc>().add(
-                              AuthEventForgotpassword(email),
-                            );
-                      },
-                      child: const Text(
-                        'Reset Password',
-                        style: TextStyle(
-                          color: Colors.black,
-                          fontWeight: FontWeight.bold,
+        body: Center(
+          child: SingleChildScrollView(
+            child: SafeArea(
+              child: Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    ///E-mail Field
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 25.0),
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: Colors.grey[200],
+                          borderRadius: BorderRadius.circular(12.0),
+                        ),
+                        child: TextField(
+                          keyboardType: TextInputType.emailAddress,
+                          style: const TextStyle(color: Colors.black),
+                          controller: _controller,
+                          enableSuggestions: false,
+                          autocorrect: false,
+                          textAlign: TextAlign.center,
+                          decoration: InputDecoration(
+                              enabledBorder: OutlineInputBorder(
+                                borderSide: const BorderSide(
+                                    color: Colors.white, width: 1.0),
+                                borderRadius: BorderRadius.circular(12.0),
+                              ),
+                              focusedBorder: OutlineInputBorder(
+                                borderSide: const BorderSide(
+                                  color: Colors.amber,
+                                  width: 1.0,
+                                ),
+                                borderRadius: BorderRadius.circular(12.0),
+                              ),
+                              border: InputBorder.none,
+                              hintText: 'Enter your Email...'),
                         ),
                       ),
                     ),
-                  ),
-                ),
+                    const SizedBox(
+                      height: 10.0,
+                    ),
 
-                ///Return to Login
-                TextButton(
-                    onPressed: () {
-                      context.read<AuthBloc>().add(const AuthEventLogOut());
-                    },
-                    child: const Text(
-                      'Back to login page',
-                      style: TextStyle(color: Colors.blue),
-                    )),
-              ],
+                    /// Reset Button
+                    Container(
+                      padding: const EdgeInsets.all(20),
+                      child: SizedBox(
+                        width: 250,
+                        height: 60,
+                        child: TextButton(
+                          style: ButtonStyle(
+                            shape: MaterialStateProperty.all(
+                                RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(12.0))),
+                            backgroundColor:
+                                MaterialStateProperty.all<Color>(Colors.amber),
+                          ),
+                          onPressed: () async {
+                            final email = _controller.text;
+                            context.read<AuthBloc>().add(
+                                  AuthEventForgotpassword(email),
+                                );
+                          },
+                          child: const Text(
+                            'Reset Password',
+                            style: TextStyle(
+                              color: Colors.black,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+
+                    ///Return to Login
+                    TextButton(
+                        onPressed: () {
+                          context.read<AuthBloc>().add(const AuthEventLogOut());
+                        },
+                        child: const Text(
+                          'Back to login page',
+                          style: TextStyle(color: Colors.blue),
+                        )),
+                  ],
+                ),
+              ),
             ),
           ),
         ),

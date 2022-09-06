@@ -2,14 +2,15 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:pocketnotes/Services/auth/bloc/auth_bloc.dart';
 import 'package:pocketnotes/Services/auth/bloc/auth_event.dart';
 import 'package:pocketnotes/Services/cloud/cloud_note.dart';
 import 'package:pocketnotes/Services/cloud/firebase_cloud_storage.dart';
-import '../../Services/auth/auth-service.dart';
+import '../../Services/auth/auth_service.dart';
 import '../../enums/Menu.dart';
 import '../../utilities/dialogs/logout_dialog.dart';
-import '../Constants/Routes.dart';
+import '../Constants/routes.dart';
 import 'notes_list_view.dart';
 
 class NotesView extends StatefulWidget {
@@ -32,6 +33,7 @@ class _NotesViewState extends State<NotesView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+        backgroundColor: Color.fromARGB(255, 200, 200, 200),
         appBar: AppBar(
           title: const Text('Pocket Notes'),
           actions: [
@@ -72,11 +74,20 @@ class _NotesViewState extends State<NotesView> {
                 if (snapshot.hasData) {
                   final allNotes = snapshot.data as Iterable<CloudNote>;
                   if (allNotes.isEmpty) {
-                    return Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: const [
-                        Text('No Notes Available...'),
-                      ],
+                    return Center(
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            'No Notes Available...',
+                            textAlign: TextAlign.center,
+                            style: GoogleFonts.montserrat(
+                              fontSize: 25,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
+                      ),
                     );
                   } else {
                     return NotesListView(

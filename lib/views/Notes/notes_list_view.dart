@@ -1,8 +1,5 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:pocketnotes/Services/cloud/cloud_note.dart';
-import 'package:pocketnotes/Services/crud/notes_service.dart';
-
 import '../../utilities/dialogs/delete_dialog.dart';
 
 typedef NoteCallback = void Function(CloudNote note);
@@ -21,31 +18,43 @@ class NotesListView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ListView.builder(
-      itemCount: notes.length,
-      itemBuilder: (context, index) {
-        final note = notes.elementAt(index);
-        return ListTile(
-          onTap: () {
-            onTap(note);
-          },
-          title: Text(
-            note.text,
-            maxLines: 1,
-            softWrap: true,
-            overflow: TextOverflow.ellipsis,
-          ),
-          trailing: IconButton(
-            onPressed: () async {
-              final shouldDelete = await showDeleteDialog(context);
-              if (shouldDelete) {
-                onDeleteNote(note);
-              }
+    return Padding(
+      padding: const EdgeInsets.all(15.0),
+      child: ListView.separated(
+        itemCount: notes.length,
+        separatorBuilder: (BuildContext context, int index) => const Divider(),
+        itemBuilder: (context, index) {
+          final notesList = notes.toList();
+          notesList.sort(
+              (a, b) => a.text.toLowerCase().compareTo(b.text.toLowerCase()));
+          final note = notesList[index];
+          return ListTile(
+            tileColor: Colors.amber,
+            shape: RoundedRectangleBorder(
+              side: const BorderSide(color: Colors.black, width: 2),
+              borderRadius: BorderRadius.circular(5),
+            ),
+            onTap: () {
+              onTap(note);
             },
-            icon: const Icon(Icons.delete),
-          ),
-        );
-      },
+            title: Text(
+              note.text,
+              maxLines: 1,
+              softWrap: true,
+              overflow: TextOverflow.ellipsis,
+            ),
+            trailing: IconButton(
+              onPressed: () async {
+                final shouldDelete = await showDeleteDialog(context);
+                if (shouldDelete) {
+                  onDeleteNote(note);
+                }
+              },
+              icon: const Icon(Icons.delete),
+            ),
+          );
+        },
+      ),
     );
   }
 }

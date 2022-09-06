@@ -1,8 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:pocketnotes/Services/cloud/cloud_note.dart';
 import 'package:pocketnotes/Services/cloud/cloud_storage_constants.dart';
 import 'package:pocketnotes/Services/cloud/cloud_storage_exception.dart';
+import 'dart:io';
 
 class FirebaseCloudStorage {
   final notes = FirebaseFirestore.instance.collection('notes');
@@ -49,6 +49,8 @@ class FirebaseCloudStorage {
 //Create Note
   Future<CloudNote> createNewNote({required String ownerUserId}) async {
     try {
+      await InternetAddress.lookup('www.google.com');
+
       final document = await notes.add({
         ownerUserIdFieldName: ownerUserId,
         textFieldName: '',
@@ -57,7 +59,7 @@ class FirebaseCloudStorage {
       return CloudNote(
           documentId: fetchedNote.id, ownerUserId: ownerUserId, text: '');
     } catch (e) {
-      throw CouldNotCreateNoteException();
+      return Future.error('Couldn\'t create Note');
     }
   }
 

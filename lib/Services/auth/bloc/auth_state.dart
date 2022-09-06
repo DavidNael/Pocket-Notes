@@ -1,6 +1,6 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:pocketnotes/Services/auth/User.dart';
+import 'package:pocketnotes/Services/auth/user.dart';
 
 @immutable
 abstract class AuthState {
@@ -45,6 +45,12 @@ class AuthStateNeedsVerification extends AuthState {
   const AuthStateNeedsVerification(
       {required bool isLoading, required this.exception, String? loadingText})
       : super(isLoading: isLoading, loadingText: loadingText);
+}
+
+///Welcome
+class AuthStateFirstLaunch extends AuthState {
+  const AuthStateFirstLaunch({required bool isLoading})
+      : super(isLoading: isLoading);
 }
 
 class AuthStateLoggedOut extends AuthState with EquatableMixin {

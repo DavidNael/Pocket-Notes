@@ -1,8 +1,8 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:pocketnotes/Services/auth/Exceptions.dart';
-import 'package:pocketnotes/Services/auth/Provider.dart';
-import 'package:pocketnotes/Services/auth/User.dart';
+import 'package:pocketnotes/Services/auth/exceptions.dart';
+import 'package:pocketnotes/Services/auth/provider.dart';
+import 'package:pocketnotes/Services/auth/user.dart';
 import 'package:test/test.dart';
 
 void main() {

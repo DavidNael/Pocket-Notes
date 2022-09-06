@@ -1,5 +1,4 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:pocketnotes/Services/cloud/cloud_storage_constants.dart';
 
 class CloudNote {
