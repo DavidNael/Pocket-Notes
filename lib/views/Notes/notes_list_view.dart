@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:pocketnotes/Services/cloud/cloud_note.dart';
+import '../../enums/filter.dart';
 import '../../utilities/dialogs/delete_dialog.dart';
 
 typedef NoteCallback = void Function(CloudNote note);
@@ -15,6 +16,47 @@ class NotesListView extends StatelessWidget {
     required this.onDeleteNote,
     required this.onTap,
   }) : super(key: key);
+  sortNotes({required List notes}) {
+    switch (filterOption) {
+      case 0:
+        notes.sort(
+          (a, b) => a.text.toLowerCase().compareTo(
+                b.text.toLowerCase(),
+              ),
+        );
+        break;
+      case 1:
+        notes.sort(
+          (b, a) => a.text.toLowerCase().compareTo(
+                b.text.toLowerCase(),
+              ),
+        );
+        break;
+      case 2:
+        notes.sort(
+          (b, a) => a.date.toLowerCase().compareTo(
+                b.date.toLowerCase(),
+              ),
+        );
+        return notes;
+
+      case 3:
+        notes.sort(
+          (a, b) => a.date.toLowerCase().compareTo(
+                b.date.toLowerCase(),
+              ),
+        );
+        break;
+      default:
+        notes.sort(
+          (b, a) => a.text.toLowerCase().compareTo(
+                b.text.toLowerCase(),
+              ),
+        );
+        break;
+    }
+    return notes.toList();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -25,8 +67,7 @@ class NotesListView extends StatelessWidget {
         separatorBuilder: (BuildContext context, int index) => const Divider(),
         itemBuilder: (context, index) {
           final notesList = notes.toList();
-          notesList.sort(
-              (a, b) => a.text.toLowerCase().compareTo(b.text.toLowerCase()));
+          sortNotes(notes: notesList);
           final note = notesList[index];
           return ListTile(
             tileColor: Colors.amber,
@@ -37,11 +78,25 @@ class NotesListView extends StatelessWidget {
             onTap: () {
               onTap(note);
             },
-            title: Text(
-              note.text,
-              maxLines: 1,
-              softWrap: true,
-              overflow: TextOverflow.ellipsis,
+            title: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  note.text,
+                  maxLines: 1,
+                  softWrap: true,
+                  overflow: TextOverflow.ellipsis,
+                  textAlign: TextAlign.left,
+                ),
+                const SizedBox(height: 5),
+                Text(
+                  note.date,
+                  maxLines: 1,
+                  softWrap: true,
+                  overflow: TextOverflow.ellipsis,
+                  textScaleFactor: 0.7,
+                ),
+              ],
             ),
             trailing: IconButton(
               onPressed: () async {

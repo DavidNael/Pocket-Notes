@@ -57,11 +57,12 @@ class _LoginSignupViewState extends State<LoginSignupView> {
             await showErrorDialog(context, 'Invalid email format.');
           } else if (state.exception is UnknownException) {
             await showErrorDialog(context,
-                'Unknown error, Make sure you are connected to the internet and try again.');
+                'Unknown error. Make sure you are connected to the internet and try again.');
           }
         } else if (state is AuthStateRegistering) {
           if (state.exception is WeakPasswordAuthException) {
-            await showErrorDialog(context, 'Weak Password');
+            await showErrorDialog(context,
+                'Weak Password. password must contain capital letter, small letter, numirical digit, and at least 8 digits.');
           } else if (state.exception is EmailExistsAuthException) {
             await showErrorDialog(
                 context, 'The email you are trying to enter already exists.');
@@ -80,7 +81,7 @@ class _LoginSignupViewState extends State<LoginSignupView> {
             await showErrorDialog(context, 'Invalid email format.');
           } else if (state.exception is UnknownException) {
             await showErrorDialog(context,
-                'Unknown error, Make sure you are connected to the internet and try again.');
+                'Unknown error. Make sure you are connected to the internet and try again.');
           }
         }
       },
@@ -471,24 +472,27 @@ class _LoginSignupViewState extends State<LoginSignupView> {
             color: Colors.black,
             padding: const EdgeInsets.symmetric(horizontal: 25),
             height: 80,
-            child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-              Center(
-                child: SmoothPageIndicator(
-                  controller: _pageController,
-                  count: 2,
-                  effect: const WormEffect(
-                    spacing: 16,
-                    dotColor: Colors.amber,
-                    activeDotColor: Color.fromARGB(255, 255, 98, 0),
-                  ),
-                  onDotClicked: (index) => _pageController.animateToPage(
-                    index,
-                    duration: const Duration(milliseconds: 500),
-                    curve: Curves.easeOut,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Center(
+                  child: SmoothPageIndicator(
+                    controller: _pageController,
+                    count: 2,
+                    effect: const WormEffect(
+                      spacing: 16,
+                      dotColor: Colors.amber,
+                      activeDotColor: Color.fromARGB(255, 255, 98, 0),
+                    ),
+                    onDotClicked: (index) => _pageController.animateToPage(
+                      index,
+                      duration: const Duration(milliseconds: 500),
+                      curve: Curves.easeOut,
+                    ),
                   ),
                 ),
-              ),
-            ]),
+              ],
+            ),
           ),
         );
       },

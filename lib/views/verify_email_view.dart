@@ -37,7 +37,7 @@ class _VerifyEmailViewState extends State<VerifyEmailView> {
                   children: [
                     ///Page Description
                     const Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 25.0),
+                      padding: EdgeInsets.symmetric(horizontal: 25.0),
                       child: Text(
                         'We\'ve sent you an email verification. please open it to verify your account.\n\n\n',
                         style: TextStyle(

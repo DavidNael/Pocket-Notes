@@ -37,7 +37,9 @@ class FireBaseProvider implements AuthProvider {
         throw UserNotLoggedInAuthException();
       }
     } on FirebaseAuthException catch (e) {
-      if (e.code == 'invalid-email') {
+      if (!RegExp(
+              r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+")
+          .hasMatch(email)) {
         throw InvalidEmailAuthException();
       } else if (e.code == 'weak-password') {
         throw WeakPasswordAuthException();
@@ -89,7 +91,9 @@ class FireBaseProvider implements AuthProvider {
         throw UserNotLoggedInAuthException();
       }
     } on FirebaseAuthException catch (e) {
-      if (e.code == 'invalid-email') {
+      if (!RegExp(
+              r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+")
+          .hasMatch(email)) {
         throw InvalidEmailAuthException();
       } else if (e.code == 'user-not-found') {
         throw UserNotFoundAuthException();

@@ -3,8 +3,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:pocketnotes/Services/auth/bloc/auth_bloc.dart';
 import 'package:pocketnotes/Services/auth/firebase_provider.dart';
 import 'package:pocketnotes/views/Constants/routes.dart';
+import 'package:pocketnotes/views/Notes/test.dart';
 import 'package:pocketnotes/views/controller_view.dart';
-import 'package:pocketnotes/views/Notes/create_update_note_view.dart';
 import 'package:pocketnotes/views/forgot_password.dart';
 
 void main() async {
@@ -21,7 +21,7 @@ void main() async {
         child: const ControllerView(),
       ),
       routes: {
-        createOrUpdateNoteRoute: (context) => const CreateUpdateNoteView(),
+        createOrUpdateNoteRoute: (context) => const TestNote(),
         forgotPasswordRoute: (context) => const ForgotPasswordView(),
       },
     ),
