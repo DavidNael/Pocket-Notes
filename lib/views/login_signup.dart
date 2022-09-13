@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:flutter_settings_screens/flutter_settings_screens.dart';
 import 'package:pocketnotes/Services/auth/exceptions.dart';
 import 'package:pocketnotes/Services/auth/bloc/auth_bloc.dart';
 import 'package:pocketnotes/Services/auth/bloc/auth_event.dart';
 import 'package:pocketnotes/Services/auth/bloc/auth_state.dart';
+import 'package:pocketnotes/views/Constants/app_theme.dart';
+import 'package:pocketnotes/views/settings.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
-
 import '../utilities/dialogs/error_dialog.dart';
 import '../utilities/dialogs/verification_dialog.dart';
 
@@ -20,10 +22,21 @@ class LoginSignupView extends StatefulWidget {
 class _LoginSignupViewState extends State<LoginSignupView> {
   late final TextEditingController _email;
   late final TextEditingController _password;
+  late bool isDarkMode;
+  late String themeColor;
   final _pageController = PageController();
+  late SharedPreferences prefs;
+
   DateTime timeBackPressed = DateTime.now();
   @override
   void initState() {
+    initializeprefs().then(
+      (value) {
+        prefs = value;
+      },
+    );
+    isDarkMode = prefs.getBool('isDarkmode') ?? true;
+    themeColor = prefs.getString('theme-color') ?? 'orange';
     _email = TextEditingController();
     _password = TextEditingController();
     super.initState();
@@ -35,6 +48,11 @@ class _LoginSignupViewState extends State<LoginSignupView> {
     _password.dispose();
     _pageController.dispose();
     super.dispose();
+  }
+
+  Future<SharedPreferences> initializeprefs() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    return prefs;
   }
 
   @override
@@ -87,7 +105,7 @@ class _LoginSignupViewState extends State<LoginSignupView> {
       },
       builder: (context, state) {
         return Scaffold(
-          backgroundColor: Colors.amber,
+          backgroundColor: Colors.yellow[900],
           body: Container(
             padding: const EdgeInsets.only(bottom: 80.0),
             child: PageView(
@@ -102,7 +120,9 @@ class _LoginSignupViewState extends State<LoginSignupView> {
                         child: Container(
                           decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(15),
-                              color: Colors.grey[300],
+                              color: isDarkMode
+                                  ? darkBorderTheme
+                                  : lightBorderTheme,
                               border: Border.all(color: Colors.black)),
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.center,
@@ -118,9 +138,12 @@ class _LoginSignupViewState extends State<LoginSignupView> {
                                 padding: const EdgeInsets.only(bottom: 50),
                                 child: Text(
                                   'Login',
-                                  style: GoogleFonts.lato(
-                                    fontSize: 23,
+                                  style: TextStyle(
+                                    fontSize: 30,
                                     fontWeight: FontWeight.bold,
+                                    color: isDarkMode
+                                        ? darkHeaderTheme
+                                        : lightHeaderTheme,
                                   ),
                                 ),
                               ),
@@ -131,33 +154,46 @@ class _LoginSignupViewState extends State<LoginSignupView> {
                                     horizontal: 25.0),
                                 child: Container(
                                   decoration: BoxDecoration(
-                                    color: Colors.grey[200],
+                                    color: isDarkMode ? darkTheme : lightTheme,
                                     borderRadius: BorderRadius.circular(12.0),
                                   ),
                                   child: TextField(
                                     keyboardType: TextInputType.emailAddress,
-                                    style: const TextStyle(color: Colors.black),
+                                    style: TextStyle(
+                                      color: isDarkMode
+                                          ? darkTextTheme
+                                          : lightTextTheme,
+                                    ),
                                     controller: _email,
                                     enableSuggestions: false,
                                     autocorrect: false,
                                     textAlign: TextAlign.center,
                                     decoration: InputDecoration(
-                                        enabledBorder: OutlineInputBorder(
-                                          borderSide: const BorderSide(
-                                              color: Colors.white, width: 1.0),
-                                          borderRadius:
-                                              BorderRadius.circular(12.0),
+                                      enabledBorder: OutlineInputBorder(
+                                        borderSide: BorderSide(
+                                            color: isDarkMode
+                                                ? darkBorderTheme
+                                                : lightBorderTheme,
+                                            width: 1.0),
+                                        borderRadius:
+                                            BorderRadius.circular(12.0),
+                                      ),
+                                      focusedBorder: OutlineInputBorder(
+                                        borderSide: BorderSide(
+                                          color: Colors.yellow.shade900,
+                                          width: 1.0,
                                         ),
-                                        focusedBorder: OutlineInputBorder(
-                                          borderSide: const BorderSide(
-                                            color: Colors.amber,
-                                            width: 1.0,
-                                          ),
-                                          borderRadius:
-                                              BorderRadius.circular(12.0),
-                                        ),
-                                        border: InputBorder.none,
-                                        hintText: 'Enter your Email...'),
+                                        borderRadius:
+                                            BorderRadius.circular(12.0),
+                                      ),
+                                      border: InputBorder.none,
+                                      hintText: 'Enter your Email...',
+                                      hintStyle: TextStyle(
+                                        color: isDarkMode
+                                            ? darkTextTheme
+                                            : lightTextTheme,
+                                      ),
+                                    ),
                                   ),
                                 ),
                               ),
@@ -171,34 +207,48 @@ class _LoginSignupViewState extends State<LoginSignupView> {
                                     horizontal: 25.0),
                                 child: Container(
                                   decoration: BoxDecoration(
-                                      color: Colors.grey[200],
+                                      color:
+                                          isDarkMode ? darkTheme : lightTheme,
                                       // border: Border.all(color: Colors.white),
                                       borderRadius:
                                           BorderRadius.circular(12.0)),
                                   child: TextField(
                                     obscureText: true,
-                                    style: const TextStyle(color: Colors.black),
+                                    style: TextStyle(
+                                      color: isDarkMode
+                                          ? darkTextTheme
+                                          : lightTextTheme,
+                                    ),
                                     controller: _password,
                                     enableSuggestions: false,
                                     autocorrect: false,
                                     textAlign: TextAlign.center,
                                     decoration: InputDecoration(
-                                        enabledBorder: OutlineInputBorder(
-                                          borderSide: const BorderSide(
-                                              color: Colors.white, width: 1.0),
-                                          borderRadius:
-                                              BorderRadius.circular(12.0),
+                                      enabledBorder: OutlineInputBorder(
+                                        borderSide: BorderSide(
+                                            color: isDarkMode
+                                                ? darkBorderTheme
+                                                : lightBorderTheme,
+                                            width: 1.0),
+                                        borderRadius:
+                                            BorderRadius.circular(12.0),
+                                      ),
+                                      focusedBorder: OutlineInputBorder(
+                                        borderSide: BorderSide(
+                                          color: Colors.yellow.shade900,
+                                          width: 1.0,
                                         ),
-                                        focusedBorder: OutlineInputBorder(
-                                          borderSide: const BorderSide(
-                                            color: Colors.amber,
-                                            width: 1.0,
-                                          ),
-                                          borderRadius:
-                                              BorderRadius.circular(12.0),
-                                        ),
-                                        border: InputBorder.none,
-                                        hintText: 'Enter your Password...'),
+                                        borderRadius:
+                                            BorderRadius.circular(12.0),
+                                      ),
+                                      border: InputBorder.none,
+                                      hintText: 'Enter your Password...',
+                                      hintStyle: TextStyle(
+                                        color: isDarkMode
+                                            ? darkTextTheme
+                                            : lightTextTheme,
+                                      ),
+                                    ),
                                   ),
                                 ),
                               ),
@@ -240,7 +290,7 @@ class _LoginSignupViewState extends State<LoginSignupView> {
                                                   BorderRadius.circular(12.0))),
                                       backgroundColor:
                                           MaterialStateProperty.all<Color>(
-                                              Colors.amber),
+                                              Colors.yellow.shade900),
                                     ),
                                     onPressed: () async {
                                       final email = _email.text;
@@ -252,10 +302,12 @@ class _LoginSignupViewState extends State<LoginSignupView> {
                                             password,
                                           ));
                                     },
-                                    child: const Text(
+                                    child: Text(
                                       'Login',
                                       style: TextStyle(
-                                        color: Colors.black,
+                                        color: isDarkMode
+                                            ? darkTextTheme
+                                            : lightTextTheme,
                                         fontWeight: FontWeight.bold,
                                       ),
                                     ),
@@ -267,8 +319,13 @@ class _LoginSignupViewState extends State<LoginSignupView> {
                               Row(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
-                                  const Text(
+                                  Text(
                                     'Don\'t have an Account?',
+                                    style: TextStyle(
+                                      color: isDarkMode
+                                          ? darkTextTheme
+                                          : lightTextTheme,
+                                    ),
                                   ),
                                   TextButton(
                                       onPressed: () {
@@ -301,7 +358,9 @@ class _LoginSignupViewState extends State<LoginSignupView> {
                         child: Container(
                           decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(15),
-                              color: Colors.grey[300],
+                              color: isDarkMode
+                                  ? darkBorderTheme
+                                  : lightBorderTheme,
                               border: Border.all(color: Colors.black)),
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.center,
@@ -316,9 +375,12 @@ class _LoginSignupViewState extends State<LoginSignupView> {
                                 padding: const EdgeInsets.only(bottom: 50),
                                 child: Text(
                                   'Register',
-                                  style: GoogleFonts.lato(
-                                    fontSize: 23,
+                                  style: TextStyle(
+                                    fontSize: 30,
                                     fontWeight: FontWeight.bold,
+                                    color: isDarkMode
+                                        ? darkHeaderTheme
+                                        : lightHeaderTheme,
                                   ),
                                 ),
                               ),
@@ -329,34 +391,48 @@ class _LoginSignupViewState extends State<LoginSignupView> {
                                     horizontal: 25.0),
                                 child: Container(
                                   decoration: BoxDecoration(
-                                      color: Colors.grey[200],
+                                      color:
+                                          isDarkMode ? darkTheme : lightTheme,
                                       // border: Border.all(color: Colors.white),
                                       borderRadius:
                                           BorderRadius.circular(12.0)),
                                   child: TextField(
                                     keyboardType: TextInputType.emailAddress,
-                                    style: const TextStyle(color: Colors.black),
+                                    style: TextStyle(
+                                      color: isDarkMode
+                                          ? darkTextTheme
+                                          : lightTextTheme,
+                                    ),
                                     controller: _email,
                                     enableSuggestions: false,
                                     autocorrect: false,
                                     textAlign: TextAlign.center,
                                     decoration: InputDecoration(
-                                        enabledBorder: OutlineInputBorder(
-                                          borderSide: const BorderSide(
-                                              color: Colors.white, width: 1.0),
-                                          borderRadius:
-                                              BorderRadius.circular(12.0),
+                                      enabledBorder: OutlineInputBorder(
+                                        borderSide: BorderSide(
+                                            color: isDarkMode
+                                                ? darkBorderTheme
+                                                : lightBorderTheme,
+                                            width: 1.0),
+                                        borderRadius:
+                                            BorderRadius.circular(12.0),
+                                      ),
+                                      focusedBorder: OutlineInputBorder(
+                                        borderSide: BorderSide(
+                                          color: Colors.yellow.shade900,
+                                          width: 1.0,
                                         ),
-                                        focusedBorder: OutlineInputBorder(
-                                          borderSide: const BorderSide(
-                                            color: Colors.amber,
-                                            width: 1.0,
-                                          ),
-                                          borderRadius:
-                                              BorderRadius.circular(12.0),
-                                        ),
-                                        border: InputBorder.none,
-                                        hintText: 'Enter your Email...'),
+                                        borderRadius:
+                                            BorderRadius.circular(12.0),
+                                      ),
+                                      border: InputBorder.none,
+                                      hintText: 'Enter your Email...',
+                                      hintStyle: TextStyle(
+                                        color: isDarkMode
+                                            ? darkTextTheme
+                                            : lightTextTheme,
+                                      ),
+                                    ),
                                   ),
                                 ),
                               ),
@@ -370,34 +446,48 @@ class _LoginSignupViewState extends State<LoginSignupView> {
                                     horizontal: 25.0),
                                 child: Container(
                                   decoration: BoxDecoration(
-                                      color: Colors.grey[200],
+                                      color:
+                                          isDarkMode ? darkTheme : lightTheme,
                                       // border: Border.all(color: Colors.white),
                                       borderRadius:
                                           BorderRadius.circular(12.0)),
                                   child: TextField(
                                     obscureText: true,
-                                    style: const TextStyle(color: Colors.black),
+                                    style: TextStyle(
+                                      color: isDarkMode
+                                          ? darkTextTheme
+                                          : lightTextTheme,
+                                    ),
                                     controller: _password,
                                     enableSuggestions: false,
                                     autocorrect: false,
                                     textAlign: TextAlign.center,
                                     decoration: InputDecoration(
-                                        enabledBorder: OutlineInputBorder(
-                                          borderSide: const BorderSide(
-                                              color: Colors.white, width: 1.0),
-                                          borderRadius:
-                                              BorderRadius.circular(12.0),
+                                      enabledBorder: OutlineInputBorder(
+                                        borderSide: BorderSide(
+                                            color: isDarkMode
+                                                ? darkBorderTheme
+                                                : lightBorderTheme,
+                                            width: 1.0),
+                                        borderRadius:
+                                            BorderRadius.circular(12.0),
+                                      ),
+                                      focusedBorder: OutlineInputBorder(
+                                        borderSide: BorderSide(
+                                          color: Colors.yellow.shade900,
+                                          width: 1.0,
                                         ),
-                                        focusedBorder: OutlineInputBorder(
-                                          borderSide: const BorderSide(
-                                            color: Colors.amber,
-                                            width: 1.0,
-                                          ),
-                                          borderRadius:
-                                              BorderRadius.circular(12.0),
-                                        ),
-                                        border: InputBorder.none,
-                                        hintText: 'Enter your Password...'),
+                                        borderRadius:
+                                            BorderRadius.circular(12.0),
+                                      ),
+                                      border: InputBorder.none,
+                                      hintText: 'Enter your Password...',
+                                      hintStyle: TextStyle(
+                                        color: isDarkMode
+                                            ? darkTextTheme
+                                            : lightTextTheme,
+                                      ),
+                                    ),
                                   ),
                                 ),
                               ),
@@ -414,7 +504,7 @@ class _LoginSignupViewState extends State<LoginSignupView> {
                                                   BorderRadius.circular(12.0))),
                                       backgroundColor:
                                           MaterialStateProperty.all<Color>(
-                                              Colors.amber),
+                                              Colors.yellow.shade900),
                                     ),
                                     onPressed: () async {
                                       final email = _email.text;
@@ -426,10 +516,12 @@ class _LoginSignupViewState extends State<LoginSignupView> {
                                             ),
                                           );
                                     },
-                                    child: const Text(
+                                    child: Text(
                                       'Register',
                                       style: TextStyle(
-                                        color: Colors.black,
+                                        color: isDarkMode
+                                            ? darkTextTheme
+                                            : lightTextTheme,
                                         fontWeight: FontWeight.bold,
                                       ),
                                     ),
@@ -439,8 +531,13 @@ class _LoginSignupViewState extends State<LoginSignupView> {
                               Row(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
-                                  const Text(
+                                  Text(
                                     'Already have an Account?',
+                                    style: TextStyle(
+                                      color: isDarkMode
+                                          ? darkTextTheme
+                                          : lightTextTheme,
+                                    ),
                                   ),
                                   TextButton(
                                       onPressed: () {

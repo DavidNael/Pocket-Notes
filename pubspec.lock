@@ -356,6 +356,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "6.0.0"
+  flutter_settings_screens:
+    dependency: "direct main"
+    description:
+      name: flutter_settings_screens
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "0.3.3-null-safety+2"
   flutter_test:
     dependency: "direct dev"
     description: flutter
@@ -640,7 +647,7 @@ packages:
     source: hosted
     version: "4.2.4"
   provider:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: provider
       url: "https://pub.dartlang.org"

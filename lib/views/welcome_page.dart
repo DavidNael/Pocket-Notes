@@ -86,9 +86,9 @@ class _WelcomePageState extends State<WelcomePage> {
                   child: Padding(
                     padding: const EdgeInsets.all(20.0),
                     child: Text(
-                      'You Can: \n \u2022 Create Notes \n \u2022 Edit Notes \n \u2022 Delete Notes \n \u2022 Share Your Notes',
+                      '\u2022 Enjoy a completely ad-free experience. \n\n \u2022 The app is as secure as you\'d like it to be. \n\n \u2022 Easily manage and filter all your notes. \n\n \u2022 Retrieve all your notes by simply logging into your account.',
                       style: GoogleFonts.montserrat(
-                        fontSize: 25,
+                        fontSize: 23,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
@@ -134,7 +134,7 @@ class _WelcomePageState extends State<WelcomePage> {
                         side: const BorderSide(
                             color: Color.fromARGB(202, 0, 0, 0), width: 5)),
                     primary: Colors.black,
-                    backgroundColor: const Color.fromARGB(255, 255, 98, 0),
+                    backgroundColor: const Color.fromARGB(255, 255, 130, 0),
                     minimumSize: const Size.fromHeight(80),
                   ),
                   child: Text(

@@ -1,1 +1,1 @@
-enum MenuBar { logout }
+enum MenuBar { logout, settings }

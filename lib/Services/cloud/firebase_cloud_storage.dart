@@ -58,7 +58,7 @@ class FirebaseCloudStorage {
     try {
       await InternetAddress.lookup('www.google.com');
       DateTime now = DateTime.now();
-      String formattedDate = DateFormat('yyyy-MM-dd–hh:mm:ss a').format(now);
+      String formattedDate = DateFormat('yyyy/MM/dd hh:mm:ss a').format(now);
       final document = await notes.add({
         ownerUserIdFieldName: ownerUserId,
         textFieldName: '',
