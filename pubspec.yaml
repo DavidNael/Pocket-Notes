@@ -53,6 +53,8 @@ dependencies:
   flutter_quill: ^6.0.0
   flutter_settings_screens: ^0.3.3-null-safety+2
   provider: ^6.0.3
+  intl: ^0.17.0
+  tuple: ^2.0.0
 
 dev_dependencies:
   flutter_test:

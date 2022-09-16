@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:pocketnotes/Services/auth/bloc/auth_bloc.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 
 import '../Services/auth/bloc/auth_event.dart';
+import 'Constants/app_theme.dart';
 
 class WelcomePage extends StatefulWidget {
   const WelcomePage({Key? key}) : super(key: key);
@@ -65,11 +65,11 @@ class _WelcomePageState extends State<WelcomePage> {
                     const SizedBox(
                       height: 40,
                     ),
-                    Center(
+                    const Center(
                       child: Text(
                         'Welcome To Pocket Notes App',
                         textAlign: TextAlign.center,
-                        style: GoogleFonts.montserrat(
+                        style: TextStyle(
                           fontSize: 30,
                           fontWeight: FontWeight.bold,
                         ),
@@ -82,12 +82,12 @@ class _WelcomePageState extends State<WelcomePage> {
               ///Page 2
               Container(
                 color: Colors.amber,
-                child: Center(
+                child: const Center(
                   child: Padding(
-                    padding: const EdgeInsets.all(20.0),
+                    padding: EdgeInsets.all(20.0),
                     child: Text(
-                      '\u2022 Enjoy a completely ad-free experience. \n\n \u2022 The app is as secure as you\'d like it to be. \n\n \u2022 Easily manage and filter all your notes. \n\n \u2022 Retrieve all your notes by simply logging into your account.',
-                      style: GoogleFonts.montserrat(
+                      '\u2022 Enjoy a fantastic writing experience with various Themes to choose from. \n\n \u2022 The app is as secure as you\'d like it to be. \n\n \u2022 Easily manage and filter all your notes. \n\n \u2022 Retrieve all your Data by simply logging into your account.',
+                      style: TextStyle(
                         fontSize: 23,
                         fontWeight: FontWeight.bold,
                       ),
@@ -100,12 +100,12 @@ class _WelcomePageState extends State<WelcomePage> {
               Container(
                 padding: const EdgeInsets.all(15),
                 color: Colors.amber,
-                child: Center(
+                child: const Center(
                   child: Center(
                     child: Text(
                       'Let\'s Begin by Adding You to Your Account. ',
                       textAlign: TextAlign.center,
-                      style: GoogleFonts.montserrat(
+                      style: TextStyle(
                         fontSize: 25,
                         fontWeight: FontWeight.bold,
                       ),
@@ -122,8 +122,7 @@ class _WelcomePageState extends State<WelcomePage> {
                 color: Colors.amber,
                 child: TextButton(
                   onPressed: () async {
-                    final prefs = await SharedPreferences.getInstance();
-                    prefs.setBool('showWelcome', false);
+                    AppTheme.prefs.setBool('showWelcome', false);
                     context
                         .read<AuthBloc>()
                         .add(const AuthEventShouldRegister());
@@ -137,9 +136,9 @@ class _WelcomePageState extends State<WelcomePage> {
                     backgroundColor: const Color.fromARGB(255, 255, 130, 0),
                     minimumSize: const Size.fromHeight(80),
                   ),
-                  child: Text(
+                  child: const Text(
                     'Get Started',
-                    style: GoogleFonts.montserrat(
+                    style: TextStyle(
                       fontSize: 25,
                       fontWeight: FontWeight.bold,
                     ),
@@ -154,6 +153,9 @@ class _WelcomePageState extends State<WelcomePage> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       TextButton(
+                        style: TextButton.styleFrom(
+                          primary: Colors.amber,
+                        ),
                         onPressed: () => controller.jumpToPage(2),
                         child: const Text('SKIP'),
                       ),
@@ -174,6 +176,9 @@ class _WelcomePageState extends State<WelcomePage> {
                         ),
                       ),
                       TextButton(
+                                                style: TextButton.styleFrom(
+                          primary: Colors.amber,
+                        ),
                         onPressed: () => controller.nextPage(
                           duration: const Duration(milliseconds: 500),
                           curve: Curves.easeOut,

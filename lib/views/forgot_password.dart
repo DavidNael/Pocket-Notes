@@ -6,6 +6,9 @@ import 'package:pocketnotes/Services/auth/bloc/auth_event.dart';
 import 'package:pocketnotes/Services/auth/bloc/auth_state.dart';
 import 'package:pocketnotes/utilities/dialogs/error_dialog.dart';
 import 'package:pocketnotes/utilities/dialogs/password_reset_dialog.dart';
+import 'package:provider/provider.dart';
+
+import 'Constants/app_theme.dart';
 
 class ForgotPasswordView extends StatefulWidget {
   const ForgotPasswordView({Key? key}) : super(key: key);
@@ -31,6 +34,9 @@ class _ForgotPasswordViewState extends State<ForgotPasswordView> {
 
   @override
   Widget build(BuildContext context) {
+    Color themeColor =
+        Provider.of<AppTheme>(context, listen: false).getColorTheme();
+    bool isDarkMode = Provider.of<AppTheme>(context).darkMood;
     return BlocListener<AuthBloc, AuthState>(
       listener: (context, state) async {
         if (state is AuthStateForgotPassword) {
@@ -54,95 +60,136 @@ class _ForgotPasswordViewState extends State<ForgotPasswordView> {
         }
       },
       child: Scaffold(
+        backgroundColor: themeColor,
         appBar: AppBar(
           title: const Text('Forgot Password'),
         ),
-        backgroundColor: Colors.grey[300],
         body: Center(
           child: SingleChildScrollView(
             child: SafeArea(
               child: Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    ///E-mail Field
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 25.0),
-                      child: Container(
-                        decoration: BoxDecoration(
-                          color: Colors.grey[200],
-                          borderRadius: BorderRadius.circular(12.0),
+                child: Padding(
+                  padding: const EdgeInsets.all(20.0),
+                  child: Container(
+                    decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(15),
+                        color: isDarkMode ? darkBorderTheme : lightBorderTheme,
+                        border: Border.all(color: Colors.black)),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const SizedBox(
+                          height: 20,
                         ),
-                        child: TextField(
-                          keyboardType: TextInputType.emailAddress,
-                          style: const TextStyle(color: Colors.black),
-                          controller: _controller,
-                          enableSuggestions: false,
-                          autocorrect: false,
-                          textAlign: TextAlign.center,
-                          decoration: InputDecoration(
-                              enabledBorder: OutlineInputBorder(
-                                borderSide: const BorderSide(
-                                    color: Colors.white, width: 1.0),
-                                borderRadius: BorderRadius.circular(12.0),
-                              ),
-                              focusedBorder: OutlineInputBorder(
-                                borderSide: const BorderSide(
-                                  color: Colors.amber,
-                                  width: 1.0,
-                                ),
-                                borderRadius: BorderRadius.circular(12.0),
-                              ),
-                              border: InputBorder.none,
-                              hintText: 'Enter your Email...'),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(
-                      height: 10.0,
-                    ),
 
-                    /// Reset Button
-                    Container(
-                      padding: const EdgeInsets.all(20),
-                      child: SizedBox(
-                        width: 250,
-                        height: 60,
-                        child: TextButton(
-                          style: ButtonStyle(
-                            shape: MaterialStateProperty.all(
-                                RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(12.0))),
-                            backgroundColor:
-                                MaterialStateProperty.all<Color>(Colors.amber),
-                          ),
-                          onPressed: () async {
-                            final email = _controller.text;
-                            context.read<AuthBloc>().add(
-                                  AuthEventForgotpassword(email),
-                                );
-                          },
-                          child: const Text(
+                        ///Login Text
+                        Container(
+                          padding: const EdgeInsets.only(bottom: 50),
+                          child: Text(
                             'Reset Password',
                             style: TextStyle(
-                              color: Colors.black,
+                              fontSize: 20,
                               fontWeight: FontWeight.bold,
+                              color:
+                                  isDarkMode ? darkHeaderTheme : lightHeaderTheme,
                             ),
                           ),
                         ),
-                      ),
-                    ),
 
-                    ///Return to Login
-                    TextButton(
-                        onPressed: () {
-                          context.read<AuthBloc>().add(const AuthEventLogOut());
-                        },
-                        child: const Text(
-                          'Back to login page',
-                          style: TextStyle(color: Colors.blue),
-                        )),
-                  ],
+                        ///E-mail Field
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 25.0),
+                          child: Container(
+                            decoration: BoxDecoration(
+                              color: isDarkMode ? darkTheme : lightTheme,
+                              borderRadius: BorderRadius.circular(12.0),
+                            ),
+                            child: TextField(
+                              keyboardType: TextInputType.emailAddress,
+                              style: TextStyle(
+                                color:
+                                    isDarkMode ? darkTextTheme : lightTextTheme,
+                              ),
+                              controller: _controller,
+                              enableSuggestions: false,
+                              autocorrect: false,
+                              textAlign: TextAlign.center,
+                              decoration: InputDecoration(
+                                enabledBorder: OutlineInputBorder(
+                                  borderSide: BorderSide(
+                                      color: isDarkMode
+                                          ? darkBorderTheme
+                                          : lightBorderTheme,
+                                      width: 1.0),
+                                  borderRadius: BorderRadius.circular(12.0),
+                                ),
+                                focusedBorder: OutlineInputBorder(
+                                  borderSide: BorderSide(
+                                    color: themeColor,
+                                    width: 1.0,
+                                  ),
+                                  borderRadius: BorderRadius.circular(12.0),
+                                ),
+                                border: InputBorder.none,
+                                hintText: 'Enter your Email...',
+                                hintStyle: TextStyle(
+                                  color:
+                                      isDarkMode ? darkTextTheme : lightTextTheme,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(
+                          height: 10.0,
+                        ),
+
+                        /// Reset Button
+                        Container(
+                          padding: const EdgeInsets.all(20),
+                          child: SizedBox(
+                            width: 250,
+                            height: 60,
+                            child: TextButton(
+                              style: ButtonStyle(
+                                shape: MaterialStateProperty.all(
+                                    RoundedRectangleBorder(
+                                        borderRadius:
+                                            BorderRadius.circular(12.0))),
+                                backgroundColor: MaterialStateProperty.all<Color>(
+                                    Colors.amber),
+                              ),
+                              onPressed: () async {
+                                final email = _controller.text;
+                                context.read<AuthBloc>().add(
+                                      AuthEventForgotpassword(email),
+                                    );
+                              },
+                              child: const Text(
+                                'Reset Password',
+                                style: TextStyle(
+                                  color: Colors.black,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+
+                        ///Return to Login
+                        TextButton(
+                            onPressed: () {
+                              context
+                                  .read<AuthBloc>()
+                                  .add(const AuthEventLogOut());
+                            },
+                            child: const Text(
+                              'Back to login page',
+                              style: TextStyle(color: Colors.blue),
+                            )),
+                      ],
+                    ),
+                  ),
                 ),
               ),
             ),

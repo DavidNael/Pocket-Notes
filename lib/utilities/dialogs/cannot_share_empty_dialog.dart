@@ -1,7 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:pocketnotes/utilities/dialogs/generic_dialog.dart';
 
-Future<void> ShowCannotShareEmptyNoteDialog(
+Future<void> showCannotShareEmptyNoteDialog(
   BuildContext context,
 ) {
   return showGenericDialog<void>(

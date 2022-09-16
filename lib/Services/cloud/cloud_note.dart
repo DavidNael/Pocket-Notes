@@ -4,21 +4,30 @@ import 'package:pocketnotes/Services/cloud/cloud_storage_constants.dart';
 class CloudNote {
   final String documentId;
   final String ownerUserId;
-  final String text;
-  final String json;
-  final String date;
+  final String note;
+  final String noteJson;
+  final String title;
+  final String titleJson;
+  final String dateCreated;
+  final String dateModified;
 
   CloudNote({
     required this.documentId,
     required this.ownerUserId,
-    required this.text,
-    required this.json,
-    required this.date,
+    required this.note,
+    required this.noteJson,
+    required this.title,
+    required this.titleJson,
+    required this.dateCreated,
+    required this.dateModified,
   });
   CloudNote.fromSnapshot(QueryDocumentSnapshot<Map<String, dynamic>> snapshot)
       : documentId = snapshot.id,
         ownerUserId = snapshot.data()[ownerUserIdFieldName] as String,
-        text = snapshot.data()[textFieldName] as String,
-        json = snapshot.data()[jsonFieldName] as String,
-        date = snapshot.data()[dateFieldName] as String;
+        note = snapshot.data()[noteFieldName] as String,
+        noteJson = snapshot.data()[noteJsonFieldName] as String,
+        title = snapshot.data()[titleFieldName] as String,
+        titleJson = snapshot.data()[titleJsonFieldName] as String,
+        dateCreated = snapshot.data()[dateCreatedFieldName] as String,
+        dateModified = snapshot.data()[dateModifiedFieldName] as String;
 }

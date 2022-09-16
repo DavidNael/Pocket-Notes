@@ -1,23 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_quill/flutter_quill.dart' hide Text;
-import 'package:flutter_settings_screens/flutter_settings_screens.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:pocketnotes/Services/auth/auth_service.dart';
 import 'package:pocketnotes/Services/cloud/cloud_note.dart';
 import 'package:pocketnotes/Services/cloud/firebase_cloud_storage.dart';
 import 'package:pocketnotes/utilities/dialogs/cannot_share_empty_dialog.dart';
 import 'package:pocketnotes/utilities/generics/get_arguments.dart';
+import 'package:pocketnotes/views/Constants/keys.dart';
 import 'package:provider/provider.dart';
 import 'package:share_plus/share_plus.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tuple/tuple.dart';
 import 'dart:convert';
 import 'package:intl/intl.dart';
-
 import '../Constants/app_theme.dart';
-import '../settings.dart';
 
 class CreateUpdateView extends StatefulWidget {
   const CreateUpdateView({Key? key}) : super(key: key);
@@ -29,13 +25,21 @@ class CreateUpdateView extends StatefulWidget {
 class _CreateUpdateViewState extends State<CreateUpdateView> {
   CloudNote? _note;
   late final FirebaseCloudStorage _notesService;
-  late final QuillController _quillController;
+
+  QuillController _quillNoteController = QuillController.basic();
+  QuillController _quillTitleController = QuillController.basic();
+
   String initialText = '';
-  final FocusNode _focusNode = FocusNode();
-  late bool toastColor;
+  String initialTitleText = '';
 
-  String? noteTitle;
+  final FocusNode _focusNoteNode = FocusNode();
+  final FocusNode _focusTitleNode = FocusNode();
 
+  Offset noteOffset = const Offset(0, 0);
+  Offset titleOffset = const Offset(0, 0);
+
+  ValueNotifier<bool> isNoteFocused = ValueNotifier<bool>(false);
+  
   @override
   void initState() {
     _notesService = FirebaseCloudStorage();
@@ -44,7 +48,10 @@ class _CreateUpdateViewState extends State<CreateUpdateView> {
 
   @override
   void dispose() {
-    _quillController.dispose();
+    _quillNoteController.dispose();
+    _quillTitleController.dispose();
+    _focusNoteNode.dispose();
+    _focusTitleNode.dispose();
     _deleteNoteIfTextIsEmpty();
     _saveNoteIfTextNotEmpty();
     super.dispose();
@@ -54,16 +61,21 @@ class _CreateUpdateViewState extends State<CreateUpdateView> {
     final widgetNote = context.getArgument<CloudNote>();
     if (widgetNote != null) {
       _note = widgetNote;
-      final myJSON = jsonDecode(_note?.json ?? '');
-      initialText = _note?.text ?? '';
-      _quillController = QuillController(
-        document: Document.fromJson(myJSON),
-        selection: const TextSelection.collapsed(offset: 0),
-      );
-      noteTitle = widgetNote.text;
+      final titleJSON = await jsonDecode(_note?.titleJson ?? '');
+      final noteJSON = await jsonDecode(_note?.noteJson ?? '');
+
+      _quillTitleController = QuillController(
+          document: Document.fromJson(titleJSON),
+          selection: const TextSelection.collapsed(offset: 0));
+
+      _quillNoteController = QuillController(
+          document: Document.fromJson(noteJSON),
+          selection: const TextSelection.collapsed(offset: 0));
+
+      initialTitleText = _note?.title ?? '';
+      initialText = _note?.note ?? '';
       return widgetNote;
     }
-    _quillController = QuillController.basic();
 
     final existingNote = _note;
     if (existingNote != null) {
@@ -78,202 +90,432 @@ class _CreateUpdateViewState extends State<CreateUpdateView> {
   }
 
   void _deleteNoteIfTextIsEmpty() {
+    bool isDark = AppTheme.prefs.getBool(keyDarkMode) ?? true;
     final note = _note;
-    final text = _quillController.document.toPlainText().trim();
-    if (text.isEmpty && note != null) {
+    final noteText = _quillNoteController.document.toPlainText().trim();
+    final title = _quillTitleController.document.toPlainText().trim();
+    if (note != null && noteText.isEmpty && title.isEmpty) {
       _notesService.deleteNotes(documentId: note.documentId);
       Fluttertoast.showToast(
           msg: 'Can\'t save empty note',
           toastLength: Toast.LENGTH_SHORT,
           gravity: ToastGravity.BOTTOM,
           timeInSecForIosWeb: 1,
-          backgroundColor: toastColor?darkBorderTheme:lightBorderTheme,
-          textColor: toastColor?darkTextTheme:lightTextTheme,
+          backgroundColor: isDark ? darkBorderTheme : lightBorderTheme,
+          textColor: isDark ? darkTextTheme : lightTextTheme,
           fontSize: 16.0);
     }
   }
 
   void _saveNoteIfTextNotEmpty() async {
     final note = _note;
-    final text = _quillController.document.toPlainText();
-    final json = jsonEncode(_quillController.document.toDelta().toJson());
+    final titleText = _quillTitleController.document.toPlainText();
+    final titleJson =
+        jsonEncode(_quillTitleController.document.toDelta().toJson());
+
+    final noteText = _quillNoteController.document.toPlainText();
+    final noteJson =
+        jsonEncode(_quillNoteController.document.toDelta().toJson());
     DateTime now = DateTime.now();
-    String updatedDate = DateFormat('yyyy/MM/dd hh:mm:ss a').format(now);
-    if (note != null && text.trim().isNotEmpty) {
-      if (initialText == text) {
+    String updatedDate = DateFormat('yyyy/MM/dd HH:mm:ss').format(now);
+    if (note != null &&
+        (titleText.trim().isNotEmpty || noteText.trim().isNotEmpty)) {
+      if (initialText != noteText || initialTitleText != titleText) {
         await _notesService.updateNotes(
             documentId: note.documentId,
-            text: text,
-            json: json,
-            date: note.date);
-      } else {
-        await _notesService.updateNotes(
-            documentId: note.documentId,
-            text: text,
-            json: json,
-            date: updatedDate);
+            title: titleText,
+            titleJson: titleJson,
+            note: noteText,
+            noteJson: noteJson,
+            dateModified: updatedDate);
       }
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    bool isDarkMode = Provider.of<AppTheme>(context).darkMood;
     Color themeColor =
         Provider.of<AppTheme>(context, listen: false).getColorTheme();
-    bool isDarkMode = Provider.of<AppTheme>(context).darkMood;
-    toastColor = isDarkMode;
-    return Scaffold(
-      backgroundColor: isDarkMode ? darkTheme : lightTheme,
-      appBar: AppBar(
-        title: Builder(
-          builder: (context) {
-            final widgetNote = context.getArgument<CloudNote>();
-            if (widgetNote != null) {
-              return Text(
-                widgetNote.text,
-                maxLines: 1,
-                style: TextStyle(
-                  color: isDarkMode ? Colors.black : Colors.white,
-                ),
-              );
-            } else {
-              return Text(
-                'New Note',
-                style: TextStyle(
-                  color: isDarkMode ? Colors.black : Colors.white,
-                ),
-              );
-            }
-          },
-        ),
-        actions: [
-          IconButton(
-            onPressed: () async {
-              final text = _quillController.document.toPlainText();
-              if (_note == null || text.isEmpty) {
-                await ShowCannotShareEmptyNoteDialog(context);
-              } else {
-                Share.share(text);
-              }
-            },
-            icon: Icon(
-              Icons.share,
-              color: isDarkMode ? Colors.black : Colors.white,
+    return FutureBuilder(
+      future: createOrGetExistingNote(context),
+      builder: (context, snapshot) {
+        if (snapshot.hasData) {
+          _quillTitleController.document.changes.listen((event) async {
+            _saveNoteIfTextNotEmpty();
+          });
+          _quillNoteController.document.changes.listen((event) async {
+            _saveNoteIfTextNotEmpty();
+          });
+          return Scaffold(
+            backgroundColor: isDarkMode ? darkBorderTheme : lightBorderTheme,
+            bottomSheet: Padding(
+              padding: const EdgeInsets.all(15.0),
+              child: ValueListenableBuilder<bool>(
+                valueListenable: isNoteFocused,
+                builder: ((context, value, child) {
+                  return value
+                      ? QuillToolbar.basic(
+                          iconTheme: QuillIconTheme(
+                            iconSelectedColor:
+                                isDarkMode ? darkBorderTheme : lightBorderTheme,
+                            iconSelectedFillColor: themeColor,
+                            iconUnselectedColor:
+                                isDarkMode ? darkTextTheme : lightTextTheme,
+                          ),
+                          controller: _quillNoteController,
+                        )
+                      : QuillToolbar.basic(
+                          iconTheme: QuillIconTheme(
+                            iconSelectedColor:
+                                isDarkMode ? darkBorderTheme : lightBorderTheme,
+                            iconSelectedFillColor: themeColor,
+                            iconUnselectedColor:
+                                isDarkMode ? darkTextTheme : lightTextTheme,
+                          ),
+                          controller: _quillTitleController,
+                        );
+                }),
+              ),
             ),
-          ),
-          IconButton(
-            onPressed: () {
-              Clipboard.setData(
-                ClipboardData(
-                  text: _quillController.document.toPlainText(),
-                ),
-              );
-              Fluttertoast.showToast(
-                  msg: "Copied to clipboard",
-                  toastLength: Toast.LENGTH_SHORT,
-                  gravity: ToastGravity.BOTTOM,
-                  timeInSecForIosWeb: 1,
-                  backgroundColor: Colors.yellow.shade900,
-                  textColor: Colors.black,
-                  fontSize: 16.0);
-            },
-            icon: Icon(
-              Icons.copy,
-              color: isDarkMode ? Colors.black : Colors.white,
-            ),
-          ),
-        ],
-      ),
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(15.0),
-          child: FutureBuilder(
-            future: createOrGetExistingNote(context),
-            builder: (context, snapshot) {
-              if (snapshot.hasError) {
-                return TextField(
-                  enabled: false,
-                  minLines: 2,
-                  maxLines: 2,
-                  
-                  decoration:  InputDecoration(
-                      hintText:
-                          'Error loading, Check your internet connection and try again.',hintStyle: TextStyle(color: isDarkMode?darkTextTheme:lightTextTheme)),
-                          
-                  style: GoogleFonts.roboto(
-                    fontSize: 18,
+            appBar: AppBar(
+              backgroundColor: themeColor,
+              iconTheme: IconThemeData(
+                color: isDarkMode ? darkTextTheme : lightTextTheme,
+              ),
+              title: Builder(
+                builder: (context) {
+                  final widgetNote = context.getArgument<CloudNote>();
+                  if (widgetNote != null) {
+                    return Text(
+                      widgetNote.title,
+                      maxLines: 1,
+                      style: TextStyle(
+                        color: isDarkMode ? Colors.black : Colors.white,
+                      ),
+                    );
+                  } else {
+                    return Text(
+                      'New Note',
+                      style: TextStyle(
+                        color: isDarkMode ? Colors.black : Colors.white,
+                      ),
+                    );
+                  }
+                },
+              ),
+              actions: [
+                IconButton(
+                  onPressed: () async {
+                    final text = _quillTitleController.document.toPlainText() +
+                        _quillNoteController.document.toPlainText();
+                    if (_note == null || text.isEmpty) {
+                      await showCannotShareEmptyNoteDialog(context);
+                    } else {
+                      Share.share(text);
+                    }
+                  },
+                  icon: Icon(
+                    Icons.share,
+                    color: isDarkMode ? Colors.black : Colors.white,
                   ),
-                );
-              }
-              switch (snapshot.connectionState) {
-                case ConnectionState.done:
-                  _quillController.document.changes.listen((event) async {
-                    _saveNoteIfTextNotEmpty();
-                  });
-                  return SingleChildScrollView(
-                    child: Column(
-                      children: [
-                        QuillEditor(
-                          controller: _quillController,
-                          scrollController: ScrollController(),
-                          scrollable: true,
-                          focusNode: _focusNode,
-                          autoFocus: false,
-                          readOnly: false,
-                          placeholder: 'Start Typing Your Note ...',
-                          expands: false,
-                          padding: EdgeInsets.zero,
-                          customStyles: DefaultStyles(
-                            placeHolder: DefaultTextBlockStyle(
-                                TextStyle(
+                ),
+                IconButton(
+                  onPressed: () {
+                    Clipboard.setData(
+                      ClipboardData(
+                        text: _quillTitleController.document.toPlainText() +
+                            _quillNoteController.document.toPlainText(),
+                      ),
+                    );
+                    Fluttertoast.showToast(
+                        msg: "Copied to clipboard",
+                        toastLength: Toast.LENGTH_SHORT,
+                        gravity: ToastGravity.BOTTOM,
+                        timeInSecForIosWeb: 1,
+                        backgroundColor:
+                            isDarkMode ? darkBorderTheme : lightBorderTheme,
+                        textColor: isDarkMode ? darkTextTheme : lightTextTheme,
+                        fontSize: 16.0);
+                  },
+                  icon: Icon(
+                    Icons.copy,
+                    color: isDarkMode ? Colors.black : Colors.white,
+                  ),
+                ),
+              ],
+            ),
+            body: Padding(
+                padding: const EdgeInsets.all(10.0),
+                child: SingleChildScrollView(
+                  child: Column(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.only(bottom: 15, left: 10),
+                        decoration: ShapeDecoration(
+                          shape: RoundedRectangleBorder(
+                            side:
+                                const BorderSide(color: Colors.black, width: 2),
+                            borderRadius: BorderRadius.circular(5),
+                          ),
+                          color: isDarkMode ? darkTheme : lightTheme,
+                        ),
+                        child: Listener(
+                          onPointerDown: (event) {
+                            isNoteFocused.value = false;
+                          },
+                          child: QuillEditor(
+                            controller: _quillTitleController,
+                            scrollController: ScrollController(),
+                            scrollable: true,
+                            focusNode: _focusTitleNode,
+                            autoFocus: true,
+                            readOnly: false,
+                            placeholder: 'Title',
+                            expands: false,
+                            padding: EdgeInsets.zero,
+                            customStyles: DefaultStyles(
+                              placeHolder: DefaultTextBlockStyle(
+                                  TextStyle(
+                                      color: isDarkMode
+                                          ? darkTextTheme
+                                          : lightTextTheme,
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 20),
+                                  const Tuple2(16, 0),
+                                  const Tuple2(0, 0),
+                                  null),
+                              h1: DefaultTextBlockStyle(
+                                  TextStyle(
+                                    fontSize: 40,
                                     color: isDarkMode
                                         ? darkTextTheme
                                         : lightTextTheme,
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 15),
-                                const Tuple2(16, 0),
-                                const Tuple2(0, 0),
-                                null),
-                            h1: DefaultTextBlockStyle(
-                                TextStyle(
-                                  fontSize: 32,
-                                  color: isDarkMode
-                                      ? darkTextTheme
-                                      : lightTextTheme,
-                                  height: 1.15,
-                                  fontWeight: FontWeight.w300,
-                                ),
-                                const Tuple2(16, 0),
-                                const Tuple2(0, 0),
-                                null),
-                            paragraph: DefaultTextBlockStyle(
-                                TextStyle(
-                                  color: isDarkMode
-                                      ? darkTextTheme
-                                      : lightTextTheme,
-                                ),
-                                const Tuple2(16, 0),
-                                const Tuple2(0, 0),
-                                null),
+                                    height: 1.15,
+                                    fontWeight: FontWeight.w300,
+                                  ),
+                                  const Tuple2(16, 0),
+                                  const Tuple2(0, 0),
+                                  null),
+                              h2: DefaultTextBlockStyle(
+                                  TextStyle(
+                                    fontSize: 32,
+                                    color: isDarkMode
+                                        ? darkTextTheme
+                                        : lightTextTheme,
+                                    height: 1.15,
+                                    fontWeight: FontWeight.w300,
+                                  ),
+                                  const Tuple2(16, 0),
+                                  const Tuple2(0, 0),
+                                  null),
+                              h3: DefaultTextBlockStyle(
+                                  TextStyle(
+                                    fontSize: 24,
+                                    color: isDarkMode
+                                        ? darkTextTheme
+                                        : lightTextTheme,
+                                    height: 1.15,
+                                    fontWeight: FontWeight.w300,
+                                  ),
+                                  const Tuple2(16, 0),
+                                  const Tuple2(0, 0),
+                                  null),
+                              paragraph: DefaultTextBlockStyle(
+                                  TextStyle(
+                                    fontSize: 20,
+                                    color: isDarkMode
+                                        ? darkTextTheme
+                                        : lightTextTheme,
+                                  ),
+                                  const Tuple2(16, 0),
+                                  const Tuple2(0, 0),
+                                  null),
+                            ),
                           ),
                         ),
-                        const SizedBox(
-                          height: 200,
+                      ),
+                      const SizedBox(
+                        height: 10,
+                      ),
+                      Container(
+                        padding: const EdgeInsets.only(bottom: 15, left: 10),
+                        decoration: ShapeDecoration(
+                          shape: RoundedRectangleBorder(
+                            side:
+                                const BorderSide(color: Colors.black, width: 2),
+                            borderRadius: BorderRadius.circular(5),
+                          ),
+                          color: isDarkMode ? darkTheme : lightTheme,
                         ),
-                      ],
-                    ),
-                  );
-                default:
-                  return const CircularProgressIndicator();
-              }
-            },
-          ),
-        ),
-      ),
-      bottomSheet: Padding(
-        padding: const EdgeInsets.all(15.0),
-        child: QuillToolbar.basic(controller: _quillController),
-      ),
+                        child: Listener(
+                          onPointerDown: (event) {
+                            isNoteFocused.value = true;
+                          },
+                          child: QuillEditor(
+                            controller: _quillNoteController,
+                            scrollController: ScrollController(),
+                            scrollable: true,
+                            focusNode: _focusNoteNode,
+                            autoFocus: false,
+                            readOnly: false,
+                            placeholder: 'Start Typing Your Note ...',
+                            expands: false,
+                            padding: EdgeInsets.zero,
+                            customStyles: DefaultStyles(
+                              placeHolder: DefaultTextBlockStyle(
+                                  TextStyle(
+                                      color: isDarkMode
+                                          ? darkTextTheme
+                                          : lightTextTheme,
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 15),
+                                  const Tuple2(16, 0),
+                                  const Tuple2(0, 0),
+                                  null),
+                              h1: DefaultTextBlockStyle(
+                                  TextStyle(
+                                    fontSize: 40,
+                                    color: isDarkMode
+                                        ? darkTextTheme
+                                        : lightTextTheme,
+                                    height: 1.15,
+                                    fontWeight: FontWeight.w300,
+                                  ),
+                                  const Tuple2(16, 0),
+                                  const Tuple2(0, 0),
+                                  null),
+                              h2: DefaultTextBlockStyle(
+                                  TextStyle(
+                                    fontSize: 32,
+                                    color: isDarkMode
+                                        ? darkTextTheme
+                                        : lightTextTheme,
+                                    height: 1.15,
+                                    fontWeight: FontWeight.w300,
+                                  ),
+                                  const Tuple2(16, 0),
+                                  const Tuple2(0, 0),
+                                  null),
+                              h3: DefaultTextBlockStyle(
+                                  TextStyle(
+                                    fontSize: 24,
+                                    color: isDarkMode
+                                        ? darkTextTheme
+                                        : lightTextTheme,
+                                    height: 1.15,
+                                    fontWeight: FontWeight.w300,
+                                  ),
+                                  const Tuple2(16, 0),
+                                  const Tuple2(0, 0),
+                                  null),
+                              paragraph: DefaultTextBlockStyle(
+                                  TextStyle(
+                                    fontSize: 15,
+                                    color: isDarkMode
+                                        ? darkTextTheme
+                                        : lightTextTheme,
+                                  ),
+                                  const Tuple2(16, 0),
+                                  const Tuple2(0, 0),
+                                  null),
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(
+                        height: 200,
+                      ),
+                    ],
+                  ),
+                )),
+          );
+        }
+        else if (snapshot.hasError) {
+          return Scaffold(
+            backgroundColor: isDarkMode ? darkBorderTheme : lightBorderTheme,
+            appBar: AppBar(
+              title: Builder(
+                builder: (context) {
+                  final widgetNote = context.getArgument<CloudNote>();
+                  if (widgetNote != null) {
+                    return Text(
+                      widgetNote.title,
+                      maxLines: 1,
+                      style: TextStyle(
+                        color: isDarkMode ? Colors.black : Colors.white,
+                      ),
+                    );
+                  } else {
+                    return Text(
+                      'New Note',
+                      style: TextStyle(
+                        color: isDarkMode ? Colors.black : Colors.white,
+                      ),
+                    );
+                  }
+                },
+              ),
+            ),
+            body: Padding(
+              padding: const EdgeInsets.all(10.0),
+              child: Text(
+                'Error loading, Check your internet connection and try again.',
+                style: TextStyle(
+                  color: isDarkMode ? darkTextTheme : lightTextTheme,
+                  fontSize: 25,
+                ),
+              ),
+            ),
+          );
+        }
+         else {
+          return Scaffold(
+            backgroundColor: isDarkMode ? darkBorderTheme : lightBorderTheme,
+            appBar: AppBar(
+              title: Builder(
+                builder: (context) {
+                  final widgetNote = context.getArgument<CloudNote>();
+                  if (widgetNote != null) {
+                    return Text(
+                      widgetNote.title,
+                      maxLines: 1,
+                      style: TextStyle(
+                        color: isDarkMode ? Colors.black : Colors.white,
+                      ),
+                    );
+                  } else {
+                    return Text(
+                      'New Note',
+                      style: TextStyle(
+                        color: isDarkMode ? Colors.black : Colors.white,
+                      ),
+                    );
+                  }
+                },
+              ),
+            ),
+            body: Center(
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            'Loading Note...',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                                fontSize: 25,
+                                fontWeight: FontWeight.bold,
+                                color: isDarkMode
+                                    ? darkTextTheme
+                                    : lightTextTheme),
+                          ),
+                          const CircularProgressIndicator()
+                        ],
+                      ),
+                    )
+          );
+        }
+      },
     );
   }
 }

@@ -1,20 +1,27 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_settings_screens/flutter_settings_screens.dart';
+import 'package:intl/intl.dart';
 import 'package:pocketnotes/views/Constants/keys.dart';
+import 'package:pocketnotes/views/Settings/filter_page.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
-const darkModeKey = 'key-dark-mode';
+///App Colors
+const orangeDarkTheme = Color.fromARGB(255, 200, 100, 0);
+const orangeLightTheme = Color.fromARGB(255, 255, 160, 10);
+const orangeAccentTheme = Color.fromARGB(255, 255, 160, 40);
+const greenDarkTheme = Color.fromARGB(255, 0, 100, 0);
+const greenLightTheme = Color.fromARGB(255, 0, 200, 7);
+const greenAccentTheme = Color.fromARGB(255, 50, 250, 60);
+const purpleDarkTheme = Color.fromARGB(255, 110, 0, 150);
+const purpleLightTheme = Color.fromARGB(255, 180, 0, 220);
+const purpleAccentTheme = Color.fromARGB(255, 225, 80, 255);
+const blueDarkTheme = Color.fromARGB(255, 0, 70, 130);
+const blueLightTheme = Color.fromARGB(255, 20, 150, 255);
+const blueAccentTheme = Color.fromARGB(255, 80, 180, 255);
+const redDarkTheme = Color.fromARGB(255, 130, 0, 0);
+const redLightTheme = Color.fromARGB(255, 255, 50, 25);
+const redAccentTheme = Color.fromARGB(255, 255, 90, 60);
 
-final orangeDarkTheme = Colors.orange.shade600;
-const orangeLightTheme = Colors.amber;
-final greenDarkTheme = Colors.green.shade600;
-const greenLightTheme = Colors.green;
-final purpleDarkTheme = Colors.purple.shade600;
-const purpleLightTheme = Colors.purple;
-final blueDarkTheme = Colors.blue.shade600;
-const blueLightTheme = Colors.blue;
-final redDarkTheme = Colors.red.shade600;
-const redLightTheme = Colors.red;
-
+///App Theme Colors
 final darkTheme = Colors.grey.shade800;
 const darkHeaderTheme = Colors.white;
 final darkTextTheme = Colors.grey.shade300;
@@ -26,14 +33,16 @@ const lightHeaderTheme = Colors.black;
 const lightTextTheme = Colors.black;
 final lightBorderTheme = Colors.grey.shade300;
 final lightCanvasTheme = Colors.grey.shade200;
+
+///Swatch Maps
 Map<int, Color> orangeMap = {
   50: orangeLightTheme,
   100: orangeLightTheme,
   200: orangeLightTheme,
   300: orangeLightTheme,
-  400: orangeDarkTheme,
-  500: orangeDarkTheme,
-  600: orangeDarkTheme,
+  400: orangeLightTheme,
+  500: orangeLightTheme,
+  600: orangeLightTheme,
   700: orangeDarkTheme,
   800: orangeDarkTheme,
   900: orangeDarkTheme,
@@ -43,7 +52,7 @@ Map<int, Color> greenMap = {
   100: greenLightTheme,
   200: greenLightTheme,
   300: greenLightTheme,
-  400: greenDarkTheme,
+  400: greenLightTheme,
   500: greenDarkTheme,
   600: greenDarkTheme,
   700: greenDarkTheme,
@@ -55,7 +64,7 @@ Map<int, Color> purpleMap = {
   100: purpleLightTheme,
   200: purpleLightTheme,
   300: purpleLightTheme,
-  400: purpleDarkTheme,
+  400: purpleLightTheme,
   500: purpleDarkTheme,
   600: purpleDarkTheme,
   700: purpleDarkTheme,
@@ -67,7 +76,7 @@ Map<int, Color> blueMap = {
   100: blueLightTheme,
   200: blueLightTheme,
   300: blueLightTheme,
-  400: blueDarkTheme,
+  400: blueLightTheme,
   500: blueDarkTheme,
   600: blueDarkTheme,
   700: blueDarkTheme,
@@ -79,19 +88,25 @@ Map<int, Color> redMap = {
   100: redLightTheme,
   200: redLightTheme,
   300: redLightTheme,
-  400: redDarkTheme,
+  400: redLightTheme,
   500: redDarkTheme,
   600: redDarkTheme,
   700: redDarkTheme,
   800: redDarkTheme,
   900: redDarkTheme,
 };
-MaterialColor orangeDarkSwatch = MaterialColor(orangeDarkTheme.value, orangeMap);
-MaterialColor orangeLightSwatch = MaterialColor(orangeLightTheme.value, orangeMap);
+
+///Swatches
+MaterialColor orangeDarkSwatch =
+    MaterialColor(orangeDarkTheme.value, orangeMap);
+MaterialColor orangeLightSwatch =
+    MaterialColor(orangeLightTheme.value, orangeMap);
 MaterialColor greenDarkSwatch = MaterialColor(greenDarkTheme.value, greenMap);
 MaterialColor greenLightSwatch = MaterialColor(greenLightTheme.value, greenMap);
-MaterialColor purpleDarkSwatch = MaterialColor(purpleDarkTheme.value, purpleMap);
-MaterialColor purpleLightSwatch = MaterialColor(purpleLightTheme.value, purpleMap);
+MaterialColor purpleDarkSwatch =
+    MaterialColor(purpleDarkTheme.value, purpleMap);
+MaterialColor purpleLightSwatch =
+    MaterialColor(purpleLightTheme.value, purpleMap);
 MaterialColor blueDarkSwatch = MaterialColor(blueDarkTheme.value, blueMap);
 MaterialColor blueLightSwatch = MaterialColor(blueLightTheme.value, blueMap);
 MaterialColor redDarkSwatch = MaterialColor(redDarkTheme.value, redMap);
@@ -99,11 +114,37 @@ MaterialColor redLightSwatch = MaterialColor(redLightTheme.value, redMap);
 
 ///AppTheme Class
 class AppTheme extends ChangeNotifier {
-  bool darkMood = Settings.getValue<bool>(darkModeKey) ?? true;
-  String themeColor = Settings.getValue<String>(keyThemeColor) ?? 'orange';
-  late MaterialColor swatch=getSwatch();
+  static late SharedPreferences prefs;
+  int filterOption = AppTheme.prefs.getInt(keyFilterOption) ?? 0;
+  int dateFormatOption = AppTheme.prefs.getInt(keyDateFormatOption) ?? 0;
+  bool darkMood = AppTheme.prefs.getBool(keyDarkMode) ?? true;
+  bool hourFormat = AppTheme.prefs.getBool(keyHourFormatOption) ?? false;
+  String themeColor = AppTheme.prefs.getString(keyThemeColor) ?? 'orange';
+  late MaterialColor swatch = getSwatch();
+
+  ///Initialize SharedPreferences
+  static Future init() async {
+    prefs = await SharedPreferences.getInstance();
+  }
+
+  /// Setters
   void setDarkTheme({required bool isDark}) {
     darkMood = isDark;
+    notifyListeners();
+  }
+
+  void setFilterOption({required int option}) {
+    filterOption = option;
+    notifyListeners();
+  }
+
+  void setDateFormatOption({required int option}) {
+    dateFormatOption = option;
+    notifyListeners();
+  }
+
+  void setHourFormatOption({required bool option}) {
+    hourFormat = option;
     notifyListeners();
   }
 
@@ -111,9 +152,11 @@ class AppTheme extends ChangeNotifier {
     themeColor = color;
     notifyListeners();
   }
-  MaterialColor getSwatch (){
-  switch(themeColor){
-    case 'orange':
+
+  ///Get Primary Swatch Color
+  MaterialColor getSwatch() {
+    switch (themeColor) {
+      case 'orange':
         if (darkMood) {
           return orangeDarkSwatch;
         } else {
@@ -145,22 +188,42 @@ class AppTheme extends ChangeNotifier {
         }
       default:
         return orangeDarkSwatch;
+    }
   }
-}
 
+  ///Get App Accent Color
+  Color getAccent() {
+    switch (themeColor) {
+      case 'orange':
+        return orangeAccentTheme;
+      case 'green':
+        return greenAccentTheme;
+      case 'purple':
+        return purpleAccentTheme;
+      case 'blue':
+        return blueAccentTheme;
+      case 'red':
+        return redAccentTheme;
+      default:
+        return orangeAccentTheme;
+    }
+  }
+
+  /// Get App Theme
   ThemeData getDarkTheme() {
     ThemeData theme = darkMood
         ? ThemeData(
             primarySwatch: getSwatch(),
-            canvasColor: darkCanvasTheme,
+            canvasColor: darkBorderTheme,
           )
         : ThemeData(
             primarySwatch: getSwatch(),
-            canvasColor: lightCanvasTheme,
+            canvasColor: lightBorderTheme,
           );
     return theme;
   }
 
+  ///Get App Color
   Color getColorTheme() {
     switch (themeColor) {
       case 'orange':
@@ -199,6 +262,97 @@ class AppTheme extends ChangeNotifier {
   }
 }
 
+///Date Format
+formatDate(
+    {required String date,
+    required int formatOption,
+    required bool isHourFormat}) {
+  DateTime dateTime = DateFormat("yyyy/MM/dd HH:mm:ss").parse(date);
+  String newDate = '';
+  switch (formatOption) {
+    case 0:
+      if (isHourFormat) {
+        newDate = DateFormat('dd/MM/yyyy HH:MM').format(dateTime);
+      } else {
+        newDate = DateFormat('dd/MM/yyyy hh:mm a').format(dateTime);
+      }
+      break;
+    case 1:
+      if (isHourFormat) {
+        newDate = DateFormat('MM/dd/yyyy HH:MM').format(dateTime);
+      } else {
+        newDate = DateFormat('MM/dd/yyyy hh:mm a').format(dateTime);
+      }
+      break;
+    case 2:
+      if (isHourFormat) {
+        newDate = DateFormat('yyyy/MM/dd HH:MM').format(dateTime);
+      } else {
+        newDate = DateFormat('yyyy/MM/dd hh:mm a').format(dateTime);
+      }
+      break;
+  }
+  return newDate;
+}
+
+/// Note Sorting
+sortNotes({required List notes, required int filterOption}) async {
+  switch (filterOption) {
+    case 0:
+      notes.sort(
+        (a, b) => a.title.toLowerCase().compareTo(
+              b.title.toLowerCase(),
+            ),
+      );
+      break;
+    case 1:
+      notes.sort(
+        (b, a) => a.title.toLowerCase().compareTo(
+              b.title.toLowerCase(),
+            ),
+      );
+      break;
+    case 2:
+      notes.sort(
+        (b, a) => a.dateModified.toLowerCase().compareTo(
+              b.dateModified.toLowerCase(),
+            ),
+      );
+      return notes;
+
+    case 3:
+      notes.sort(
+        (a, b) => a.dateModified.toLowerCase().compareTo(
+              b.dateModified.toLowerCase(),
+            ),
+      );
+      break;
+    case 4:
+      notes.sort(
+        (b, a) => a.dateCreated.toLowerCase().compareTo(
+              b.dateCreated.toLowerCase(),
+            ),
+      );
+      break;
+    case 5:
+      notes.sort(
+        (a, b) => a.dateCreated.toLowerCase().compareTo(
+              b.dateCreated.toLowerCase(),
+            ),
+      );
+      break;
+    default:
+      notes.sort(
+        (b, a) => a.text.toLowerCase().compareTo(
+              b.text.toLowerCase(),
+            ),
+      );
+      break;
+  }
+  return notes.toList();
+}
+
+/// Icon Widget Class
 class IconWidget extends StatelessWidget {
   final IconData icon;
   final Color color;
@@ -233,6 +387,52 @@ class IconWidget extends StatelessWidget {
           style: TextStyle(color: textColor),
         ),
       ],
+    );
+  }
+}
+
+dynamic ac = FilterPageView();
+
+class SettingsTile extends StatelessWidget {
+  final IconData icon;
+  final Color color;
+  final Color iconColor;
+  final Color textColor;
+  final String title;
+  final String? subtitle;
+  final Widget? trailing;
+  final bool isDarkMode;
+  final VoidCallback onTap;
+  const SettingsTile({
+    Key? key,
+    required this.icon,
+    required this.color,
+    required this.iconColor,
+    required this.textColor,
+    required this.title,
+    required this.isDarkMode,
+    required this.subtitle,
+    required this.onTap,
+    required this.trailing,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return ListTile(
+      tileColor: isDarkMode ? darkTheme : lightTheme,
+      shape: RoundedRectangleBorder(
+        side: BorderSide(color: isDarkMode ? darkTheme : lightTheme, width: 1),
+        borderRadius: BorderRadius.circular(5),
+      ),
+      title: IconWidget(
+          icon: icon,
+          color: color,
+          iconColor: iconColor,
+          textColor: textColor,
+          text: title),
+      subtitle: subtitle != null ? Text(subtitle ?? '') : null,
+      onTap: onTap,
+      trailing: trailing,
     );
   }
 }

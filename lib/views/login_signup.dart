@@ -1,13 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_settings_screens/flutter_settings_screens.dart';
 import 'package:pocketnotes/Services/auth/exceptions.dart';
 import 'package:pocketnotes/Services/auth/bloc/auth_bloc.dart';
 import 'package:pocketnotes/Services/auth/bloc/auth_event.dart';
 import 'package:pocketnotes/Services/auth/bloc/auth_state.dart';
 import 'package:pocketnotes/views/Constants/app_theme.dart';
-import 'package:pocketnotes/views/settings.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:provider/provider.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 import '../utilities/dialogs/error_dialog.dart';
 import '../utilities/dialogs/verification_dialog.dart';
@@ -22,21 +20,11 @@ class LoginSignupView extends StatefulWidget {
 class _LoginSignupViewState extends State<LoginSignupView> {
   late final TextEditingController _email;
   late final TextEditingController _password;
-  late bool isDarkMode;
-  late String themeColor;
   final _pageController = PageController();
-  late SharedPreferences prefs;
 
   DateTime timeBackPressed = DateTime.now();
   @override
   void initState() {
-    initializeprefs().then(
-      (value) {
-        prefs = value;
-      },
-    );
-    isDarkMode = prefs.getBool('isDarkmode') ?? true;
-    themeColor = prefs.getString('theme-color') ?? 'orange';
     _email = TextEditingController();
     _password = TextEditingController();
     super.initState();
@@ -50,13 +38,14 @@ class _LoginSignupViewState extends State<LoginSignupView> {
     super.dispose();
   }
 
-  Future<SharedPreferences> initializeprefs() async {
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
-    return prefs;
-  }
 
   @override
   Widget build(BuildContext context) {
+        Color themeColor =
+        Provider.of<AppTheme>(context, listen: false).getColorTheme();
+        Color accent =
+        Provider.of<AppTheme>(context, listen: false).getAccent();
+bool isDarkMode=Provider.of<AppTheme>(context).darkMood;
     return BlocConsumer<AuthBloc, AuthState>(
       listener: (context, state) async {
         if (state is AuthStateLoggedOut) {
@@ -105,7 +94,7 @@ class _LoginSignupViewState extends State<LoginSignupView> {
       },
       builder: (context, state) {
         return Scaffold(
-          backgroundColor: Colors.yellow[900],
+          backgroundColor: themeColor,
           body: Container(
             padding: const EdgeInsets.only(bottom: 80.0),
             child: PageView(
@@ -180,7 +169,7 @@ class _LoginSignupViewState extends State<LoginSignupView> {
                                       ),
                                       focusedBorder: OutlineInputBorder(
                                         borderSide: BorderSide(
-                                          color: Colors.yellow.shade900,
+                                          color: themeColor,
                                           width: 1.0,
                                         ),
                                         borderRadius:
@@ -197,6 +186,8 @@ class _LoginSignupViewState extends State<LoginSignupView> {
                                   ),
                                 ),
                               ),
+
+
                               const SizedBox(
                                 height: 10.0,
                               ),
@@ -235,7 +226,7 @@ class _LoginSignupViewState extends State<LoginSignupView> {
                                       ),
                                       focusedBorder: OutlineInputBorder(
                                         borderSide: BorderSide(
-                                          color: Colors.yellow.shade900,
+                                          color: themeColor,
                                           width: 1.0,
                                         ),
                                         borderRadius:
@@ -290,7 +281,7 @@ class _LoginSignupViewState extends State<LoginSignupView> {
                                                   BorderRadius.circular(12.0))),
                                       backgroundColor:
                                           MaterialStateProperty.all<Color>(
-                                              Colors.yellow.shade900),
+                                              themeColor),
                                     ),
                                     onPressed: () async {
                                       final email = _email.text;
@@ -419,7 +410,7 @@ class _LoginSignupViewState extends State<LoginSignupView> {
                                       ),
                                       focusedBorder: OutlineInputBorder(
                                         borderSide: BorderSide(
-                                          color: Colors.yellow.shade900,
+                                          color: themeColor,
                                           width: 1.0,
                                         ),
                                         borderRadius:
@@ -474,7 +465,7 @@ class _LoginSignupViewState extends State<LoginSignupView> {
                                       ),
                                       focusedBorder: OutlineInputBorder(
                                         borderSide: BorderSide(
-                                          color: Colors.yellow.shade900,
+                                          color: themeColor,
                                           width: 1.0,
                                         ),
                                         borderRadius:
@@ -504,7 +495,7 @@ class _LoginSignupViewState extends State<LoginSignupView> {
                                                   BorderRadius.circular(12.0))),
                                       backgroundColor:
                                           MaterialStateProperty.all<Color>(
-                                              Colors.yellow.shade900),
+                                              themeColor),
                                     ),
                                     onPressed: () async {
                                       final email = _email.text;
@@ -550,7 +541,7 @@ class _LoginSignupViewState extends State<LoginSignupView> {
                                       child: const Text(
                                         'Login',
                                         style: TextStyle(color: Colors.blue),
-                                      )),
+                                      ),),
                                 ],
                               )
                             ],
@@ -576,10 +567,10 @@ class _LoginSignupViewState extends State<LoginSignupView> {
                   child: SmoothPageIndicator(
                     controller: _pageController,
                     count: 2,
-                    effect: const WormEffect(
+                    effect:  WormEffect(
                       spacing: 16,
-                      dotColor: Colors.amber,
-                      activeDotColor: Color.fromARGB(255, 255, 98, 0),
+                      dotColor: accent,
+                      activeDotColor: themeColor,
                     ),
                     onDotClicked: (index) => _pageController.animateToPage(
                       index,

@@ -1,7 +1,10 @@
 const ownerUserIdFieldName = 'user_id';
 
-const textFieldName = 'text';
+const noteFieldName = 'note_text';
+const noteJsonFieldName = 'note_json';
 
-const jsonFieldName = 'note_json';
+const titleFieldName = 'title_text';
+const titleJsonFieldName = 'title_json';
 
-const dateFieldName = 'note_date';
+const dateCreatedFieldName = 'date_created';
+const dateModifiedFieldName = 'date_modified';

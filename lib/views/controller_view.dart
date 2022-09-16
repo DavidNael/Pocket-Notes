@@ -30,7 +30,7 @@ class _ControllerViewState extends State<ControllerView> {
           closeDialog();
           closeDialogHandle = null;
         } else if (state.isLoading && closeDialog == null) {
-          closeDialogHandle = ShowLoadingDialog(
+          closeDialogHandle = showLoadingDialog(
               context: context, text: state.loadingText ?? 'Loading...');
         }
       },

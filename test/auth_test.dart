@@ -1,5 +1,3 @@
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/material.dart';
 import 'package:pocketnotes/Services/auth/exceptions.dart';
 import 'package:pocketnotes/Services/auth/provider.dart';
 import 'package:pocketnotes/Services/auth/user.dart';
@@ -111,7 +109,6 @@ class MockAuthProvider implements AuthProvider {
 
   @override
   Future<void> sendPasswordReset({required String toEmail}) {
-    // TODO: implement sendPasswordReset
     throw UnimplementedError();
   }
 }
