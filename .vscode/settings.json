@@ -1,4 +1,6 @@
 {
   "cmake.configureOnOpen": true,
-  "java.configuration.updateBuildConfiguration": "interactive"
+  "java.configuration.updateBuildConfiguration": "interactive",
+  "editor.foldingStrategy": "indentation"
+
 }

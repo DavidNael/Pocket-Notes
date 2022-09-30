@@ -50,11 +50,14 @@ dependencies:
   smooth_page_indicator: ^1.0.0+2
   shared_preferences: ^2.0.15
   fluttertoast: ^8.0.9
-  flutter_quill: ^6.0.0
+  flutter_quill: ^6.0.5
   flutter_settings_screens: ^0.3.3-null-safety+2
   provider: ^6.0.3
   intl: ^0.17.0
   tuple: ^2.0.0
+  image_picker: ^0.8.5+3
+  firebase_storage: ^10.3.8
+  cached_network_image: ^3.2.1
 
 dev_dependencies:
   flutter_test:

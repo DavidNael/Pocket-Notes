@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:pocketnotes/Services/auth/bloc/auth_bloc.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 
 import '../Services/auth/bloc/auth_event.dart';
@@ -51,7 +50,7 @@ class _WelcomePageState extends State<WelcomePage> {
               ///Page 1
               Container(
                 padding: const EdgeInsets.all(20),
-                color: Colors.amber,
+                color: orangeDarkTheme,
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
@@ -81,16 +80,17 @@ class _WelcomePageState extends State<WelcomePage> {
 
               ///Page 2
               Container(
-                color: Colors.amber,
+                color: orangeDarkTheme,
                 child: const Center(
                   child: Padding(
                     padding: EdgeInsets.all(20.0),
                     child: Text(
-                      '\u2022 Enjoy a fantastic writing experience with various Themes to choose from. \n\n \u2022 The app is as secure as you\'d like it to be. \n\n \u2022 Easily manage and filter all your notes. \n\n \u2022 Retrieve all your Data by simply logging into your account.',
+                      'Enjoy a fantastic writing experience with various Themes to choose from. \n\nThe app is as secure as you\'d like it to be. \n\nEasily manage and filter all your notes. \n\nRetrieve all your Data by simply logging into your account.',
                       style: TextStyle(
                         fontSize: 23,
                         fontWeight: FontWeight.bold,
                       ),
+                      textAlign: TextAlign.start,
                     ),
                   ),
                 ),
@@ -99,7 +99,7 @@ class _WelcomePageState extends State<WelcomePage> {
               ///Page 3
               Container(
                 padding: const EdgeInsets.all(15),
-                color: Colors.amber,
+                color: orangeDarkTheme,
                 child: const Center(
                   child: Center(
                     child: Text(
@@ -119,7 +119,7 @@ class _WelcomePageState extends State<WelcomePage> {
         bottomSheet: isLastPage
             ? Container(
                 padding: const EdgeInsets.all(15),
-                color: Colors.amber,
+                color: Colors.black,
                 child: TextButton(
                   onPressed: () async {
                     AppTheme.prefs.setBool('showWelcome', false);
@@ -129,11 +129,12 @@ class _WelcomePageState extends State<WelcomePage> {
                   },
                   style: TextButton.styleFrom(
                     shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        side: const BorderSide(
-                            color: Color.fromARGB(202, 0, 0, 0), width: 5)),
+                      borderRadius: BorderRadius.circular(12),
+                      side: const BorderSide(
+                          color: Color.fromARGB(202, 0, 0, 0), width: 5),
+                    ),
                     primary: Colors.black,
-                    backgroundColor: const Color.fromARGB(255, 255, 130, 0),
+                    backgroundColor: orangeDarkTheme,
                     minimumSize: const Size.fromHeight(80),
                   ),
                   child: const Text(
@@ -176,7 +177,7 @@ class _WelcomePageState extends State<WelcomePage> {
                         ),
                       ),
                       TextButton(
-                                                style: TextButton.styleFrom(
+                        style: TextButton.styleFrom(
                           primary: Colors.amber,
                         ),
                         onPressed: () => controller.nextPage(

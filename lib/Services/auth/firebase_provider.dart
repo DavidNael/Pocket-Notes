@@ -7,6 +7,7 @@ import 'package:pocketnotes/Services/auth/exceptions.dart';
 import '../../firebase_options.dart';
 
 class FireBaseProvider implements AuthProvider {
+  
   ///Register
   @override
   Future<AuthUser> createUser({

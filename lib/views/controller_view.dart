@@ -4,12 +4,13 @@ import 'package:pocketnotes/Services/auth/bloc/auth_bloc.dart';
 import 'package:pocketnotes/Services/auth/bloc/auth_event.dart';
 import 'package:pocketnotes/Services/auth/bloc/auth_state.dart';
 import 'package:pocketnotes/utilities/dialogs/loading_dialog.dart';
+import 'package:pocketnotes/views/Constants/app_theme.dart';
 import 'package:pocketnotes/views/login_signup.dart';
 import 'package:pocketnotes/views/Notes/notes_view.dart';
 import 'package:pocketnotes/views/verify_email_view.dart';
 import 'package:pocketnotes/views/forgot_password.dart';
 import 'package:pocketnotes/views/welcome_page.dart';
-import 'Constants/Widgets.dart';
+import 'package:provider/provider.dart';
 
 class ControllerView extends StatefulWidget {
   const ControllerView({Key? key}) : super(key: key);
@@ -21,6 +22,8 @@ class ControllerView extends StatefulWidget {
 class _ControllerViewState extends State<ControllerView> {
   @override
   Widget build(BuildContext context) {
+    bool isDarkMode = Provider.of<AppTheme>(context).darkMode;
+
     CloseDialog? closeDialogHandle;
     context.read<AuthBloc>().add(const AuthEventInitialize());
     return BlocConsumer<AuthBloc, AuthState>(
@@ -46,7 +49,22 @@ class _ControllerViewState extends State<ControllerView> {
         } else if (state is AuthStateLoggedOut) {
           return const LoginSignupView();
         } else if (state is AuthStateUninitialized) {
-          return loadingWidget;
+          return Scaffold(
+            backgroundColor: isDarkMode ? darkBorderTheme : lightBorderTheme,
+            body: Center(
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: const [
+                  Text(
+                    'Loading...',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                  ),
+                  CircularProgressIndicator(),
+                ],
+              ),
+            ),
+          );
         } else if (state is AuthStateRegistering) {
           return const LoginSignupView();
         } else {

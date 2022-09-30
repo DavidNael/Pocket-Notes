@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import '../../enums/enums.dart';
 import '../Constants/app_theme.dart';
@@ -15,7 +14,7 @@ class DateFormatView extends StatefulWidget {
 class _DateFormatViewState extends State<DateFormatView> {
   @override
   Widget build(BuildContext context) {
-    bool isDarkMode = Provider.of<AppTheme>(context).darkMood;
+    bool isDarkMode = Provider.of<AppTheme>(context).darkMode;
     bool isHourFormat = Provider.of<AppTheme>(context).hourFormat;
     int dateFormatOption = Provider.of<AppTheme>(context).dateFormatOption;
     Color themeColor =

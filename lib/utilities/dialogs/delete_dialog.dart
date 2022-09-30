@@ -3,11 +3,13 @@ import 'package:pocketnotes/utilities/dialogs/generic_dialog.dart';
 
 Future<bool> showDeleteDialog(
   BuildContext context,
+  String title,
+  String content,
 ) {
   return showGenericDialog<bool>(
     context: context,
-    title: 'Delete Note',
-    content: 'Are you sure you want to delete this note?',
+    title: title,
+    content: content,
     optionsBuilder: () => {
       'Cancel': false,
       'Delete': true,

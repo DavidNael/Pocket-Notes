@@ -1,15 +1,17 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_quill/flutter_quill.dart' show QuillCheckboxBuilder;
 import 'package:intl/intl.dart';
 import 'package:pocketnotes/views/Constants/keys.dart';
-import 'package:pocketnotes/views/Settings/filter_page.dart';
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 ///App Colors
 const orangeDarkTheme = Color.fromARGB(255, 200, 100, 0);
 const orangeLightTheme = Color.fromARGB(255, 255, 160, 10);
 const orangeAccentTheme = Color.fromARGB(255, 255, 160, 40);
-const greenDarkTheme = Color.fromARGB(255, 0, 100, 0);
-const greenLightTheme = Color.fromARGB(255, 0, 200, 7);
+const greenDarkTheme = Color.fromARGB(255, 0, 140, 0);
+const greenLightTheme = Color.fromARGB(255, 0, 200, 0);
 const greenAccentTheme = Color.fromARGB(255, 50, 250, 60);
 const purpleDarkTheme = Color.fromARGB(255, 110, 0, 150);
 const purpleLightTheme = Color.fromARGB(255, 180, 0, 220);
@@ -17,7 +19,7 @@ const purpleAccentTheme = Color.fromARGB(255, 225, 80, 255);
 const blueDarkTheme = Color.fromARGB(255, 0, 70, 130);
 const blueLightTheme = Color.fromARGB(255, 20, 150, 255);
 const blueAccentTheme = Color.fromARGB(255, 80, 180, 255);
-const redDarkTheme = Color.fromARGB(255, 130, 0, 0);
+const redDarkTheme = Color.fromARGB(255, 170, 0, 0);
 const redLightTheme = Color.fromARGB(255, 255, 50, 25);
 const redAccentTheme = Color.fromARGB(255, 255, 90, 60);
 
@@ -117,7 +119,8 @@ class AppTheme extends ChangeNotifier {
   static late SharedPreferences prefs;
   int filterOption = AppTheme.prefs.getInt(keyFilterOption) ?? 0;
   int dateFormatOption = AppTheme.prefs.getInt(keyDateFormatOption) ?? 0;
-  bool darkMood = AppTheme.prefs.getBool(keyDarkMode) ?? true;
+  bool darkMode = AppTheme.prefs.getBool(keyDarkMode) ?? true;
+  bool isList = AppTheme.prefs.getBool(keyNotesViewOption) ?? true;
   bool hourFormat = AppTheme.prefs.getBool(keyHourFormatOption) ?? false;
   String themeColor = AppTheme.prefs.getString(keyThemeColor) ?? 'orange';
   late MaterialColor swatch = getSwatch();
@@ -129,7 +132,12 @@ class AppTheme extends ChangeNotifier {
 
   /// Setters
   void setDarkTheme({required bool isDark}) {
-    darkMood = isDark;
+    darkMode = isDark;
+    notifyListeners();
+  }
+
+  void setNoteView({required bool option}) {
+    isList = option;
     notifyListeners();
   }
 
@@ -157,31 +165,31 @@ class AppTheme extends ChangeNotifier {
   MaterialColor getSwatch() {
     switch (themeColor) {
       case 'orange':
-        if (darkMood) {
+        if (darkMode) {
           return orangeDarkSwatch;
         } else {
           return orangeLightSwatch;
         }
       case 'green':
-        if (darkMood) {
+        if (darkMode) {
           return greenDarkSwatch;
         } else {
           return greenLightSwatch;
         }
       case 'purple':
-        if (darkMood) {
+        if (darkMode) {
           return purpleDarkSwatch;
         } else {
           return purpleLightSwatch;
         }
       case 'blue':
-        if (darkMood) {
+        if (darkMode) {
           return blueDarkSwatch;
         } else {
           return blueLightSwatch;
         }
       case 'red':
-        if (darkMood) {
+        if (darkMode) {
           return redDarkSwatch;
         } else {
           return redLightSwatch;
@@ -211,7 +219,7 @@ class AppTheme extends ChangeNotifier {
 
   /// Get App Theme
   ThemeData getDarkTheme() {
-    ThemeData theme = darkMood
+    ThemeData theme = darkMode
         ? ThemeData(
             primarySwatch: getSwatch(),
             canvasColor: darkBorderTheme,
@@ -227,31 +235,31 @@ class AppTheme extends ChangeNotifier {
   Color getColorTheme() {
     switch (themeColor) {
       case 'orange':
-        if (darkMood) {
+        if (darkMode) {
           return orangeDarkTheme;
         } else {
           return orangeLightTheme;
         }
       case 'green':
-        if (darkMood) {
+        if (darkMode) {
           return greenDarkTheme;
         } else {
           return greenLightTheme;
         }
       case 'purple':
-        if (darkMood) {
+        if (darkMode) {
           return purpleDarkTheme;
         } else {
           return purpleLightTheme;
         }
       case 'blue':
-        if (darkMood) {
+        if (darkMode) {
           return blueDarkTheme;
         } else {
           return blueLightTheme;
         }
       case 'red':
-        if (darkMood) {
+        if (darkMode) {
           return redDarkTheme;
         } else {
           return redLightTheme;
@@ -318,8 +326,7 @@ sortNotes({required List notes, required int filterOption}) async {
               b.dateModified.toLowerCase(),
             ),
       );
-      return notes;
-
+      break;
     case 3:
       notes.sort(
         (a, b) => a.dateModified.toLowerCase().compareTo(
@@ -349,6 +356,18 @@ sortNotes({required List notes, required int filterOption}) async {
       );
       break;
   }
+  notes.sort((a, b) {
+    if (b.isPinned) {
+      return 1;
+    }
+    return -1;
+  });
+  notes.sort((a, b) {
+    if (b.isPinned) {
+      return 1;
+    }
+    return -1;
+  });
   return notes.toList();
 }
 
@@ -391,48 +410,308 @@ class IconWidget extends StatelessWidget {
   }
 }
 
-dynamic ac = FilterPageView();
-
 class SettingsTile extends StatelessWidget {
   final IconData icon;
-  final Color color;
+  final Color circleColor;
   final Color iconColor;
+  final Color tileColor;
+  final Color disabledTileColor;
+  final Color borderColor;
   final Color textColor;
   final String title;
   final String? subtitle;
   final Widget? trailing;
-  final bool isDarkMode;
+  final bool isSelected;
+  final bool isEnabled;
   final VoidCallback onTap;
   const SettingsTile({
     Key? key,
     required this.icon,
-    required this.color,
+    required this.circleColor,
     required this.iconColor,
+    required this.tileColor,
+    this.disabledTileColor = Colors.grey,
+    required this.borderColor,
     required this.textColor,
     required this.title,
-    required this.isDarkMode,
     required this.subtitle,
     required this.onTap,
     required this.trailing,
+    this.isSelected = false,
+    this.isEnabled = true,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return ListTile(
-      tileColor: isDarkMode ? darkTheme : lightTheme,
+      enabled: isEnabled,
+      tileColor: isSelected ? disabledTileColor : tileColor,
       shape: RoundedRectangleBorder(
-        side: BorderSide(color: isDarkMode ? darkTheme : lightTheme, width: 1),
+        side: BorderSide(color: borderColor, width: 1),
         borderRadius: BorderRadius.circular(5),
       ),
       title: IconWidget(
-          icon: icon,
-          color: color,
-          iconColor: iconColor,
-          textColor: textColor,
-          text: title),
+        icon: icon,
+        color: circleColor,
+        iconColor: iconColor,
+        textColor: textColor,
+        text: title,
+      ),
       subtitle: subtitle != null ? Text(subtitle ?? '') : null,
       onTap: onTap,
       trailing: trailing,
+    );
+  }
+}
+
+class ProfileImage extends StatelessWidget {
+  final String imagePath;
+  final VoidCallback onTap;
+  const ProfileImage({
+    Key? key,
+    required this.imagePath,
+    required this.onTap,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: 64,
+      height: 64,
+      child: CachedNetworkImage(
+        imageUrl: imagePath,
+        maxHeightDiskCache: 512,
+        progressIndicatorBuilder: (context, url, progress) {
+          return Padding(
+            padding: const EdgeInsets.all(15),
+            child: CircularProgressIndicator(
+              value: progress.progress,
+            ),
+          );
+        },
+        imageBuilder: (context, imageProvider) {
+          return ClipOval(
+            child: Material(
+              color: Colors.transparent,
+              child: Ink.image(
+                image: imageProvider,
+                width: 64,
+                height: 64,
+                fit: BoxFit.cover,
+                child: InkWell(
+                  onTap: onTap,
+                ),
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+}
+
+class SlidePageTransition extends PageRouteBuilder {
+  final Widget child;
+  final AxisDirection direction;
+  final int animationStartDuration;
+  final int animationEndDuration;
+
+  SlidePageTransition({
+    required this.child,
+    this.direction = AxisDirection.up,
+    this.animationStartDuration = 500,
+    this.animationEndDuration = 500,
+  }) : super(
+          transitionDuration: Duration(milliseconds: animationStartDuration),
+          reverseTransitionDuration:
+              Duration(milliseconds: animationEndDuration),
+          pageBuilder: (context, animation, secondryAnimation) => child,
+        );
+  @override
+  Widget buildTransitions(
+    BuildContext context,
+    Animation<double> animation,
+    Animation<double> secondaryAnimation,
+    Widget child,
+  ) =>
+      SlideTransition(
+        position: Tween<Offset>(
+          begin: getBeginDirection(),
+          end: Offset.zero,
+        ).animate(animation),
+        child: child,
+      );
+  Offset getBeginDirection() {
+    switch (direction) {
+      case AxisDirection.up:
+        return const Offset(0, 1);
+
+      case AxisDirection.right:
+        return const Offset(-1, 0);
+      case AxisDirection.down:
+        return const Offset(0, -1);
+      case AxisDirection.left:
+        return const Offset(1, 0);
+    }
+  }
+}
+
+class ScalePageTransition extends PageRouteBuilder {
+  final Widget child;
+  final double? x;
+  final double? y;
+  final int startDuration;
+  final int endDuration;
+
+  final Key? key;
+  ScalePageTransition(
+      {required this.child,
+      this.key,
+      this.x,
+      this.y,
+      this.startDuration = 500,
+      this.endDuration = 500})
+      : super(
+          transitionDuration: Duration(milliseconds: startDuration),
+          reverseTransitionDuration: Duration(milliseconds: endDuration),
+          pageBuilder: (context, animation, secondryAnimation) => child,
+        );
+  @override
+  Widget buildTransitions(
+    BuildContext context,
+    Animation<double> animation,
+    Animation<double> secondaryAnimation,
+    Widget child,
+  ) {
+    if (x != null && y != null) {
+      return Transform.scale(
+        scale: animation.value,
+        origin: Offset(x!, y!),
+        alignment: Alignment.topLeft,
+        child: child,
+      );
+    } else {
+      return Transform.scale(
+        scale: animation.value,
+        alignment: const Alignment(0, 0.9),
+        child: child,
+      );
+    }
+  }
+}
+
+//!WIP
+class ColorPageTransition extends PageRouteBuilder {
+  final Widget child;
+  final Color color;
+  final double? x;
+  final double? y;
+
+  final Key? key;
+  ColorPageTransition(
+      {required this.child, this.key, required this.color, this.x, this.y})
+      : super(
+          transitionDuration: const Duration(milliseconds: 500),
+          reverseTransitionDuration: const Duration(milliseconds: 500),
+          pageBuilder: (context, animation, secondryAnimation) => child,
+        );
+  @override
+  Widget buildTransitions(
+    BuildContext context,
+    Animation<double> animation,
+    Animation<double> secondaryAnimation,
+    Widget child,
+  ) {
+    Transform.scale(
+      scale: animation.value,
+      origin: Offset(x!, y!),
+      alignment: Alignment.topLeft,
+      child: Container(
+        decoration: ShapeDecoration(
+          color: color,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(300),
+          ),
+        ),
+      ),
+    );
+    return child;
+  }
+}
+
+class FadePageTransition extends PageRouteBuilder {
+  final Widget child;
+  FadePageTransition({
+    required this.child,
+  }) : super(
+          transitionDuration: const Duration(milliseconds: 500),
+          reverseTransitionDuration: const Duration(milliseconds: 500),
+          pageBuilder: (context, animation, secondryAnimation) => child,
+        );
+  @override
+  Widget buildTransitions(
+    BuildContext context,
+    Animation<double> animation,
+    Animation<double> secondaryAnimation,
+    Widget child,
+  ) =>
+      FadeTransition(
+        opacity: animation,
+        child: child,
+      );
+}
+
+class CustomCheckBox implements QuillCheckboxBuilder {
+  const CustomCheckBox();
+
+  @override
+  Widget build({
+    required BuildContext context,
+    required bool isChecked,
+    required ValueChanged<bool> onChanged,
+  }) {
+    Color themeColor =
+        Provider.of<AppTheme>(context, listen: false).getColorTheme();
+    bool isDarkMode = Provider.of<AppTheme>(context).darkMode;
+    return Center(
+      child: InkWell(
+        onTap: () {
+          isChecked = !isChecked;
+          onChanged(isChecked);
+        },
+        child: Container(
+          width: 20,
+          height: 20,
+          // padding: const EdgeInsets.only(bottom: 12),
+          decoration: ShapeDecoration(
+            shape: RoundedRectangleBorder(
+              side: BorderSide(
+                color: isChecked
+                    ? themeColor
+                    : isDarkMode
+                        ? darkTextTheme
+                        : lightTextTheme,
+                width: 1,
+              ),
+              borderRadius: BorderRadius.circular(5),
+            ),
+            color: isChecked
+                ? themeColor
+                : isDarkMode
+                    ? darkTheme
+                    : lightTheme,
+          ),
+          child: Icon(
+            isChecked ? Icons.check : null,
+            color: isChecked
+                ? isDarkMode
+                    ? darkTextTheme
+                    : lightTextTheme
+                : null,
+            size: 15,
+          ),
+        ),
+      ),
     );
   }
 }

@@ -3,6 +3,7 @@ import 'package:pocketnotes/Services/auth/exceptions.dart';
 import 'package:pocketnotes/Services/auth/provider.dart';
 import 'package:pocketnotes/Services/auth/bloc/auth_event.dart';
 import 'package:pocketnotes/Services/auth/bloc/auth_state.dart';
+import 'package:pocketnotes/Services/cloud/firebase_cloud_storage.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class AuthBloc extends Bloc<AuthEvent, AuthState> {
@@ -62,22 +63,27 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     }));
 
     ///Register
-    on<AuthEventRegister>(((event, emit) async {
-      final email = event.email;
-      final password = event.password;
-      emit(const AuthStateRegistering(
-          exception: null, isLoading: true, loadingText: 'Registering...'));
-      try {
-        await provider.createUser(
-          email: email,
-          password: password,
-        );
-        emit(const AuthStateRegistering(exception: null, isLoading: false));
-        await provider.sendEmailVerification();
-      } on Exception catch (e) {
-        emit(AuthStateRegistering(exception: e, isLoading: false));
-      }
-    }));
+    on<AuthEventRegister>(
+      ((event, emit) async {
+        final email = event.email;
+        final password = event.password;
+        emit(const AuthStateRegistering(
+            exception: null, isLoading: true, loadingText: 'Registering...'));
+        try {
+          final user = await provider.createUser(
+            email: email,
+            password: password,
+          );
+      await FirebaseCloudStorage().createNewUser(ownerUserId: user.id,username: event.username);
+          emit(const AuthStateRegistering(exception: null, isLoading: false));
+          await provider.sendEmailVerification();
+        } on Exception catch (e) {
+          emit(
+            AuthStateRegistering(exception: e, isLoading: false),
+          );
+        }
+      }),
+    );
 
     ///Should Register
     on<AuthEventShouldRegister>(((event, emit) {

@@ -36,7 +36,7 @@ class _ForgotPasswordViewState extends State<ForgotPasswordView> {
   Widget build(BuildContext context) {
     Color themeColor =
         Provider.of<AppTheme>(context, listen: false).getColorTheme();
-    bool isDarkMode = Provider.of<AppTheme>(context).darkMood;
+    bool isDarkMode = Provider.of<AppTheme>(context).darkMode;
     return BlocListener<AuthBloc, AuthState>(
       listener: (context, state) async {
         if (state is AuthStateForgotPassword) {
@@ -59,50 +59,64 @@ class _ForgotPasswordViewState extends State<ForgotPasswordView> {
           }
         }
       },
-      child: Scaffold(
-        backgroundColor: themeColor,
-        appBar: AppBar(
-          title: const Text('Forgot Password'),
-        ),
-        body: Center(
-          child: SingleChildScrollView(
-            child: SafeArea(
-              child: Center(
-                child: Padding(
-                  padding: const EdgeInsets.all(20.0),
-                  child: Container(
-                    decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(15),
-                        color: isDarkMode ? darkBorderTheme : lightBorderTheme,
-                        border: Border.all(color: Colors.black)),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        const SizedBox(
-                          height: 20,
-                        ),
+      child: WillPopScope(
+        onWillPop: () async {
+          context.read<AuthBloc>().add(const AuthEventLogOut());
+          return false;
+        },
+        child: Scaffold(
+          backgroundColor: themeColor,
+          appBar: AppBar(
+            backgroundColor: isDarkMode ? darkBorderTheme : lightBorderTheme,
+            foregroundColor: isDarkMode ? darkTextTheme : lightTextTheme,
+            leading: BackButton(
+              onPressed: () {
+                context.read<AuthBloc>().add(const AuthEventLogOut());
+              },
+            ),
+            title: const Text('Forgot Password'),
+          ),
+          body: Center(
+            child: SingleChildScrollView(
+              child: SafeArea(
+                child: Center(
+                  child: Padding(
+                    padding: const EdgeInsets.all(20.0),
+                    child: Container(
+                      decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(15),
+                          color:
+                              isDarkMode ? darkBorderTheme : lightBorderTheme,
+                          border: Border.all(color: Colors.black)),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const SizedBox(
+                            height: 20,
+                          ),
 
-                        ///Login Text
-                        Container(
-                          padding: const EdgeInsets.only(bottom: 50),
-                          child: Text(
-                            'Reset Password',
-                            style: TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold,
-                              color:
-                                  isDarkMode ? darkHeaderTheme : lightHeaderTheme,
+                          ///Login Text
+                          Container(
+                            padding: const EdgeInsets.only(bottom: 50),
+                            child: Text(
+                              'Reset Password',
+                              style: TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                                color: isDarkMode
+                                    ? darkHeaderTheme
+                                    : lightHeaderTheme,
+                              ),
                             ),
                           ),
-                        ),
 
-                        ///E-mail Field
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 25.0),
-                          child: Container(
+                          //!E-mail Field
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 25),
                             decoration: BoxDecoration(
-                              color: isDarkMode ? darkTheme : lightTheme,
-                              borderRadius: BorderRadius.circular(12.0),
+                              color: isDarkMode
+                                  ? darkBorderTheme
+                                  : lightBorderTheme,
                             ),
                             child: TextField(
                               keyboardType: TextInputType.emailAddress,
@@ -113,81 +127,74 @@ class _ForgotPasswordViewState extends State<ForgotPasswordView> {
                               controller: _controller,
                               enableSuggestions: false,
                               autocorrect: false,
-                              textAlign: TextAlign.center,
+                              textAlign: TextAlign.start,
                               decoration: InputDecoration(
-                                enabledBorder: OutlineInputBorder(
-                                  borderSide: BorderSide(
-                                      color: isDarkMode
-                                          ? darkBorderTheme
-                                          : lightBorderTheme,
-                                      width: 1.0),
-                                  borderRadius: BorderRadius.circular(12.0),
+                                contentPadding: const EdgeInsets.symmetric(
+                                  horizontal: 5,
                                 ),
-                                focusedBorder: OutlineInputBorder(
+                                labelText: 'Email:',
+                                labelStyle: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  color: isDarkMode
+                                      ? darkTextTheme
+                                      : lightTextTheme,
+                                ),
+                                enabledBorder: UnderlineInputBorder(
                                   borderSide: BorderSide(
-                                    color: themeColor,
+                                    color: isDarkMode
+                                        ? darkTextTheme
+                                        : lightTextTheme,
                                     width: 1.0,
                                   ),
-                                  borderRadius: BorderRadius.circular(12.0),
                                 ),
-                                border: InputBorder.none,
-                                hintText: 'Enter your Email...',
-                                hintStyle: TextStyle(
-                                  color:
-                                      isDarkMode ? darkTextTheme : lightTextTheme,
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(
-                          height: 10.0,
-                        ),
-
-                        /// Reset Button
-                        Container(
-                          padding: const EdgeInsets.all(20),
-                          child: SizedBox(
-                            width: 250,
-                            height: 60,
-                            child: TextButton(
-                              style: ButtonStyle(
-                                shape: MaterialStateProperty.all(
-                                    RoundedRectangleBorder(
-                                        borderRadius:
-                                            BorderRadius.circular(12.0))),
-                                backgroundColor: MaterialStateProperty.all<Color>(
-                                    Colors.amber),
-                              ),
-                              onPressed: () async {
-                                final email = _controller.text;
-                                context.read<AuthBloc>().add(
-                                      AuthEventForgotpassword(email),
-                                    );
-                              },
-                              child: const Text(
-                                'Reset Password',
-                                style: TextStyle(
-                                  color: Colors.black,
-                                  fontWeight: FontWeight.bold,
+                                focusedBorder: UnderlineInputBorder(
+                                  borderSide: BorderSide(
+                                    color: themeColor,
+                                    width: 2.0,
+                                  ),
                                 ),
                               ),
                             ),
                           ),
-                        ),
 
-                        ///Return to Login
-                        TextButton(
-                            onPressed: () {
-                              context
-                                  .read<AuthBloc>()
-                                  .add(const AuthEventLogOut());
-                            },
-                            child: const Text(
-                              'Back to login page',
-                              style: TextStyle(color: Colors.blue),
-                            )),
-                      ],
+                          const SizedBox(
+                            height: 10.0,
+                          ),
+
+                          //! Reset Button
+                          Container(
+                            padding: const EdgeInsets.all(20),
+                            child: SizedBox(
+                              width: 250,
+                              height: 60,
+                              child: TextButton(
+                                style: ButtonStyle(
+                                  shape: MaterialStateProperty.all(
+                                      RoundedRectangleBorder(
+                                          borderRadius:
+                                              BorderRadius.circular(12.0))),
+                                  backgroundColor:
+                                      MaterialStateProperty.all<Color>(
+                                          themeColor),
+                                ),
+                                onPressed: () async {
+                                  final email = _controller.text;
+                                  context.read<AuthBloc>().add(
+                                        AuthEventForgotpassword(email),
+                                      );
+                                },
+                                child: const Text(
+                                  'Reset Password',
+                                  style: TextStyle(
+                                    color: Colors.black,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ),

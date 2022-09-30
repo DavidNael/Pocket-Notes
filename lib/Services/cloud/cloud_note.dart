@@ -10,6 +10,10 @@ class CloudNote {
   final String titleJson;
   final String dateCreated;
   final String dateModified;
+  final bool isPinned;
+  final bool isArchived;
+  final bool isTrashed;
+  final List<dynamic> noteCategories;
 
   CloudNote({
     required this.documentId,
@@ -20,6 +24,10 @@ class CloudNote {
     required this.titleJson,
     required this.dateCreated,
     required this.dateModified,
+    required this.isPinned,
+    required this.isArchived,
+    required this.isTrashed,
+    required this.noteCategories,
   });
   CloudNote.fromSnapshot(QueryDocumentSnapshot<Map<String, dynamic>> snapshot)
       : documentId = snapshot.id,
@@ -29,5 +37,9 @@ class CloudNote {
         title = snapshot.data()[titleFieldName] as String,
         titleJson = snapshot.data()[titleJsonFieldName] as String,
         dateCreated = snapshot.data()[dateCreatedFieldName] as String,
-        dateModified = snapshot.data()[dateModifiedFieldName] as String;
+        dateModified = snapshot.data()[dateModifiedFieldName] as String,
+        isPinned = snapshot.data()[isPinnedFieldName] as bool,
+        isArchived = snapshot.data()[isArchivedFieldName] as bool,
+        isTrashed = snapshot.data()[isTrashedFieldName] as bool,
+        noteCategories = snapshot.data()[noteCategoriesFieldName] as List<dynamic>;
 }

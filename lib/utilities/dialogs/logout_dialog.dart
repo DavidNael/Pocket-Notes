@@ -4,6 +4,7 @@ import 'package:pocketnotes/utilities/dialogs/generic_dialog.dart';
 Future<bool> logoutConfirmation(
   BuildContext context,
 ) {
+  
   return showGenericDialog<bool>(
     context: context,
     title: 'Logout',

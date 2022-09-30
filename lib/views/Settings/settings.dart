@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:pocketnotes/views/Constants/app_theme.dart';
 import 'package:pocketnotes/views/Constants/keys.dart';
-import 'package:pocketnotes/views/Constants/routes.dart';
+import 'package:pocketnotes/views/Settings/date_format_page.dart';
+import 'package:pocketnotes/views/Settings/filter_page.dart';
 import 'package:provider/provider.dart';
 
 class SettingsView extends StatefulWidget {
@@ -15,7 +16,7 @@ class _SettingsViewState extends State<SettingsView> {
   @override
   Widget build(BuildContext context) {
     Color themeColor = Provider.of<AppTheme>(context).getColorTheme();
-    bool isDarkMode = Provider.of<AppTheme>(context).darkMood;
+    bool isDarkMode = Provider.of<AppTheme>(context).darkMode;
     String colorName = Provider.of<AppTheme>(context).themeColor;
     return Scaffold(
       backgroundColor: isDarkMode ? darkBorderTheme : lightBorderTheme,
@@ -36,7 +37,7 @@ class _SettingsViewState extends State<SettingsView> {
         padding: const EdgeInsets.all(15.0),
         child: ListView(
           children: [
-            ///General
+            //!General Tab
             Padding(
               padding: const EdgeInsets.all(8.0),
               child: Text(
@@ -47,25 +48,17 @@ class _SettingsViewState extends State<SettingsView> {
               ),
             ),
 
-            ///Dark mode Switch
+            //!Dark mode Switch
             SwitchListTile(
               title: Row(
                 children: [
-                  isDarkMode
-                      ? IconWidget(
-                          icon: Icons.dark_mode,
-                          color: darkBorderTheme,
-                          iconColor: themeColor,
-                          text: 'Dark Mode',
-                          textColor: darkTextTheme,
-                        )
-                      : IconWidget(
-                          icon: Icons.light_mode,
-                          color: themeColor,
-                          iconColor: Colors.white,
-                          text: 'Light Mode',
-                          textColor: lightTextTheme,
-                        ),
+                  IconWidget(
+                    icon: isDarkMode ? Icons.dark_mode : Icons.light_mode,
+                    color: isDarkMode ? darkBorderTheme : themeColor,
+                    iconColor: isDarkMode ? themeColor : Colors.white,
+                    text: isDarkMode ? 'Dark Mode' : 'Light Mode',
+                    textColor: isDarkMode ? darkTextTheme : lightTextTheme,
+                  ),
                 ],
               ),
               shape: RoundedRectangleBorder(
@@ -87,7 +80,7 @@ class _SettingsViewState extends State<SettingsView> {
               height: 4,
             ),
 
-            ///Theme Color Button
+            //!Theme Color Button
             ListTile(
               tileColor: isDarkMode ? darkTheme : lightTheme,
               shape: RoundedRectangleBorder(
@@ -132,8 +125,7 @@ class _SettingsViewState extends State<SettingsView> {
                       child: Text(
                         'Orange',
                         style: TextStyle(
-                          color:
-                              isDarkMode ? darkTextTheme : lightTextTheme,
+                          color: isDarkMode ? darkTextTheme : lightTextTheme,
                         ),
                       ),
                     ),
@@ -142,8 +134,7 @@ class _SettingsViewState extends State<SettingsView> {
                       child: Text(
                         'Green',
                         style: TextStyle(
-                          color:
-                              isDarkMode ? darkTextTheme : lightTextTheme,
+                          color: isDarkMode ? darkTextTheme : lightTextTheme,
                         ),
                       ),
                     ),
@@ -152,8 +143,7 @@ class _SettingsViewState extends State<SettingsView> {
                       child: Text(
                         'Purple',
                         style: TextStyle(
-                          color:
-                              isDarkMode ? darkTextTheme : lightTextTheme,
+                          color: isDarkMode ? darkTextTheme : lightTextTheme,
                         ),
                       ),
                     ),
@@ -162,8 +152,7 @@ class _SettingsViewState extends State<SettingsView> {
                       child: Text(
                         'Blue',
                         style: TextStyle(
-                          color:
-                              isDarkMode ? darkTextTheme : lightTextTheme,
+                          color: isDarkMode ? darkTextTheme : lightTextTheme,
                         ),
                       ),
                     ),
@@ -172,8 +161,7 @@ class _SettingsViewState extends State<SettingsView> {
                       child: Text(
                         'Red',
                         style: TextStyle(
-                          color:
-                              isDarkMode ? darkTextTheme : lightTextTheme,
+                          color: isDarkMode ? darkTextTheme : lightTextTheme,
                         ),
                       ),
                     ),
@@ -193,78 +181,95 @@ class _SettingsViewState extends State<SettingsView> {
               height: 4,
             ),
 
-            ///Filter Option Button
-            isDarkMode
-                ? SettingsTile(
-                    icon: Icons.filter_alt,
-                    color: darkBorderTheme,
-                    iconColor: themeColor,
-                    title: 'Sort Notes',
-                    textColor: darkTextTheme,
-                    isDarkMode: isDarkMode,
-                    subtitle: null,
-                    onTap: () {
-                      Navigator.pushNamed(context, filterSettingsRoute);
-                    },
-                    trailing: Icon(
-                      Icons.arrow_forward,
-                      color: themeColor,
-                    ),
-                  )
-                : SettingsTile(
-                    icon: Icons.filter_alt,
-                    color: themeColor,
-                    iconColor: Colors.white,
-                    title: 'Sort Notes',
-                    textColor: lightTextTheme,
-                    isDarkMode: isDarkMode,
-                    subtitle: null,
-                    onTap: () {
-                      Navigator.pushNamed(context, filterSettingsRoute);
-                    },
-                    trailing: Icon(
-                      Icons.arrow_forward,
-                      color: themeColor,
-                    ),
+            //!Filter Option Button
+            SettingsTile(
+                              isEnabled: true,
+                isSelected: false,
+
+              icon: Icons.filter_alt,
+              circleColor: isDarkMode ? darkBorderTheme : themeColor,
+              iconColor: isDarkMode ? themeColor : Colors.white,
+              tileColor: isDarkMode ? darkTheme : lightTheme,
+              borderColor: isDarkMode ? darkTheme : lightTheme,
+              title: 'Sort Notes',
+              textColor: isDarkMode ? darkTextTheme : lightTextTheme,
+              subtitle: null,
+              trailing: Icon(
+                size: 20,
+                Icons.arrow_forward_ios,
+                color: themeColor,
+              ),
+              onTap: () {
+                Navigator.of(context).push(
+                  SlidePageTransition(
+                    direction: AxisDirection.left,
+                    animationStartDuration: 300,
+                    animationEndDuration: 300,
+                    child: const FilterPageView(),
                   ),
+                );
+              },
+            ),
+
             const SizedBox(
               height: 4,
             ),
 
-            ///Date Format Button
-            isDarkMode
-                ? SettingsTile(
-                    icon: Icons.date_range_rounded,
-                    color: darkBorderTheme,
-                    iconColor: themeColor,
-                    title: 'Date Format',
-                    textColor: darkTextTheme,
-                    isDarkMode: isDarkMode,
-                    subtitle: null,
-                    onTap: () {
-                      Navigator.pushNamed(context, dateFormatSettingsRoute);
-                    },
-                    trailing: Icon(
-                      Icons.arrow_forward,
-                      color: themeColor,
-                    ),
-                  )
-                : SettingsTile(
-                    icon: Icons.date_range_rounded,
-                    color: themeColor,
-                    iconColor: Colors.white,
-                    title: 'Date Format',
-                    textColor: lightTextTheme,
-                    isDarkMode: isDarkMode,
-                    subtitle: null,
-                    onTap: () {
-                      Navigator.pushNamed(context, dateFormatSettingsRoute);
-                    },
-                    trailing: Icon(
-                      Icons.arrow_forward,
-                      color: themeColor,
-                    ),
+            //!Date Format Button
+            SettingsTile(
+                              isEnabled: true,
+                isSelected: false,
+
+              icon: Icons.date_range_rounded,
+              title: 'Date Format',
+              circleColor: isDarkMode ? darkBorderTheme : themeColor,
+              iconColor: isDarkMode ? themeColor : Colors.white,
+              tileColor: isDarkMode ? darkTheme : lightTheme,
+              borderColor: isDarkMode ? darkTheme : lightTheme,
+              textColor: isDarkMode ? darkTextTheme : lightTextTheme,
+              subtitle: null,
+              trailing: Icon(
+                size: 20,
+                Icons.arrow_forward_ios,
+                color: themeColor,
+              ),
+              onTap: () {
+                Navigator.of(context).push(
+                  SlidePageTransition(
+                    direction: AxisDirection.left,
+                    animationStartDuration: 300,
+                    animationEndDuration: 300,
+                    child: const DateFormatView(),
                   ),
+                );
+              },
+            ),
+
+            const SizedBox(
+              height: 4,
+            ),
+            //!App Version Button
+            ListTile(
+              tileColor: isDarkMode ? darkTheme : lightTheme,
+              shape: RoundedRectangleBorder(
+                side: BorderSide(
+                    color: isDarkMode ? darkTheme : lightTheme, width: 1),
+                borderRadius: BorderRadius.circular(5),
+              ),
+              title: IconWidget(
+                icon: Icons.info,
+                color: isDarkMode ? darkBorderTheme : themeColor,
+                iconColor: isDarkMode ? themeColor : Colors.white,
+                text: 'App Version',
+                textColor: isDarkMode ? darkTextTheme : lightTextTheme,
+              ),
+              trailing: Text(
+                'V1.1.0',
+                style: TextStyle(
+                  color: isDarkMode ? darkTextTheme : lightTextTheme,
+                ),
+              ),
+            )
           ],
         ),
       ),
