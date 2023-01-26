@@ -7,7 +7,6 @@ import 'package:pocketnotes/Services/auth/exceptions.dart';
 import '../../firebase_options.dart';
 
 class FireBaseProvider implements AuthProvider {
-  
   ///Register
   @override
   Future<AuthUser> createUser({
@@ -15,7 +14,7 @@ class FireBaseProvider implements AuthProvider {
     required String password,
   }) async {
     bool validatePassword(String value) {
-      RegExp regExp = RegExp(r'^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9]).{8,}$');
+      RegExp regExp = RegExp(r'^(?=.*?[a-z])(?=.*?[0-9]).{8,}$');
       if (regExp.hasMatch(value)) {
         return true;
       } else {

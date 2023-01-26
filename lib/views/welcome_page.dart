@@ -47,10 +47,10 @@ class _WelcomePageState extends State<WelcomePage> {
             },
             controller: controller,
             children: [
-              ///Page 1
+              //!Page 1
               Container(
                 padding: const EdgeInsets.all(20),
-                color: orangeDarkTheme,
+                color: orangeLightTheme,
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
@@ -78,9 +78,9 @@ class _WelcomePageState extends State<WelcomePage> {
                 ),
               ),
 
-              ///Page 2
+              //!Page 2
               Container(
-                color: orangeDarkTheme,
+                color: orangeLightTheme,
                 child: const Center(
                   child: Padding(
                     padding: EdgeInsets.all(20.0),
@@ -96,10 +96,10 @@ class _WelcomePageState extends State<WelcomePage> {
                 ),
               ),
 
-              ///Page 3
+              //!Page 3
               Container(
                 padding: const EdgeInsets.all(15),
-                color: orangeDarkTheme,
+                color: orangeLightTheme,
                 child: const Center(
                   child: Center(
                     child: Text(

@@ -6,15 +6,15 @@ import FlutterMacOS
 import Foundation
 
 import cloud_firestore
-import device_info_plus_macos
+import device_info_plus
 import firebase_analytics
 import firebase_auth
 import firebase_core
 import firebase_storage
 import pasteboard
-import path_provider_macos
-import share_plus_macos
-import shared_preferences_macos
+import path_provider_foundation
+import share_plus
+import shared_preferences_foundation
 import sqflite
 import url_launcher_macos
 

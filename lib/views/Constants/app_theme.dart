@@ -7,16 +7,16 @@ import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 ///App Colors
-const orangeDarkTheme = Color.fromARGB(255, 200, 100, 0);
+const orangeDarkTheme = Color.fromARGB(255, 200, 75, 15);
 const orangeLightTheme = Color.fromARGB(255, 255, 160, 10);
 const orangeAccentTheme = Color.fromARGB(255, 255, 160, 40);
-const greenDarkTheme = Color.fromARGB(255, 0, 140, 0);
+const greenDarkTheme = Color.fromARGB(255, 0, 120, 0);
 const greenLightTheme = Color.fromARGB(255, 0, 200, 0);
 const greenAccentTheme = Color.fromARGB(255, 50, 250, 60);
 const purpleDarkTheme = Color.fromARGB(255, 110, 0, 150);
 const purpleLightTheme = Color.fromARGB(255, 180, 0, 220);
 const purpleAccentTheme = Color.fromARGB(255, 225, 80, 255);
-const blueDarkTheme = Color.fromARGB(255, 0, 70, 130);
+const blueDarkTheme = Color.fromARGB(255, 0, 80, 170);
 const blueLightTheme = Color.fromARGB(255, 20, 150, 255);
 const blueAccentTheme = Color.fromARGB(255, 80, 180, 255);
 const redDarkTheme = Color.fromARGB(255, 170, 0, 0);

@@ -72,7 +72,7 @@ class _LoginSignupViewState extends State<LoginSignupView> {
         } else if (state is AuthStateRegistering) {
           if (state.exception is WeakPasswordAuthException) {
             await showErrorDialog(context,
-                'Weak Password. password must contain capital letter, small letter, numirical digit, and at least 8 characters long.');
+                'Weak Password. password must contain numirical digit and at least 8 characters long.');
           } else if (state.exception is EmailExistsAuthException) {
             await showErrorDialog(
                 context, 'The email you are trying to enter already exists.');

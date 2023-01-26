@@ -121,7 +121,7 @@ class _NotesViewState extends State<NotesView> {
                   child: Ink(
                     decoration: BoxDecoration(
                       border: Border.all(
-                        color: const Color.fromARGB(200, 0, 0, 0),
+                        color: Color.fromARGB(50, 0, 0, 0),
                         width: 6.0,
                       ),
                       color: themeColor,
@@ -1331,43 +1331,8 @@ class _NotesViewState extends State<NotesView> {
               return Scaffold(
                 backgroundColor:
                     isDarkMode ? darkBorderTheme : lightBorderTheme,
-                floatingActionButton: Material(
-                  type: MaterialType.transparency,
-                  child: Ink(
-                    decoration: BoxDecoration(
-                      border: Border.all(
-                        color: isDarkMode ? darkBorderTheme : lightBorderTheme,
-                        width: 6.0,
-                      ),
-                      color: themeColor,
-                      shape: BoxShape.circle,
-                    ),
-                    child: InkWell(
-                      borderRadius: BorderRadius.circular(500.0),
-                      onTap: () {
-                        Navigator.of(context).push(
-                          ScalePageTransition(
-                            child: const CreateUpdateView(),
-                          ),
-                        );
-                      },
-                      child: const Padding(
-                        padding: EdgeInsets.all(20.0),
-                        child: Icon(
-                          Icons.add,
-                          size: 30.0,
-                          color: Colors.black,
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
                 floatingActionButtonLocation:
                     FloatingActionButtonLocation.centerDocked,
-                bottomNavigationBar: Container(
-                  height: 64,
-                  color: Colors.black,
-                ),
                 appBar: AppBar(
                   centerTitle: true,
                   iconTheme: const IconThemeData(

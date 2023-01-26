@@ -16,6 +16,7 @@ import '../../utilities/dialogs/delete_dialog.dart';
 import '../../utilities/dialogs/info_dialog.dart';
 import '../../utilities/dialogs/select_category.dart';
 import '../Constants/app_theme.dart';
+import '../Constants/keys.dart';
 import 'create_update_note_view.dart';
 
 class CategoryNotesView extends StatefulWidget {
@@ -149,6 +150,18 @@ class _CategoryNotesViewState extends State<CategoryNotesView> {
                       fontWeight: FontWeight.bold,
                     ),
                   ),
+                  actions: [
+                    IconButton(
+                      onPressed: () {
+                        Provider.of<AppTheme>(context, listen: false)
+                            .setNoteView(option: !isList);
+                        AppTheme.prefs.setBool(keyNotesViewOption, !isList);
+                      },
+                      icon: Icon(
+                        isList ? Icons.list : Icons.grid_view,
+                      ),
+                    )
+                  ],
                 ),
                 body: Builder(
                   builder: (context) {

@@ -74,7 +74,8 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
             email: email,
             password: password,
           );
-      await FirebaseCloudStorage().createNewUser(ownerUserId: user.id,username: event.username);
+          await FirebaseCloudStorage()
+              .createNewUser(ownerUserId: user.id, username: event.username);
           emit(const AuthStateRegistering(exception: null, isLoading: false));
           await provider.sendEmailVerification();
         } on Exception catch (e) {
