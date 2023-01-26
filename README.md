@@ -9,7 +9,7 @@ The app also features a wide range of colorful themes to choose from. This allow
 In conclusion, Pocket Notes is a comprehensive note-taking application that offers a wide range of features to assist you in staying organized and productive. Its sleek design, intuitive interface, and powerful features make it an essential tool for anyone who needs to take notes and stay organized. Whether you're a student, a professional, or just someone looking to keep track of their thoughts and ideas, Pocket Notes is the perfect solution.
 
 # Important Note
-if you can't find the verification email, be sure to check the spam folder before attempting to send the email again.
+if you can't find the verification email, be sure to check the spam folder in case the verification email was mistakenly marked as such before attempting to send the email again.
 
 # Downloads
 Mediafire: https://www.mediafire.com/file/ih8ut6zkc72g0jj/Pocket_Notes.apk/file
